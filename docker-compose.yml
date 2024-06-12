@@ -288,20 +288,6 @@ services:
     devices:
      - /dev/dri:/dev/dri #Required for HW transcoding / QuickSync
      
-  #Membarr - to invite users via discord
-  #
-  #Can be configured so that when a plex member invites an outside user to a discord channel they are auto invited to plex
-  #
-  #Feel free to remove this container if you want to manually invite everyone yourself
-  membarr:
-    container_name: membarr
-    image: yoruio/membarr:latest
-    restart: unless-stopped
-    environment:
-      - token=${MEMBARR_TOKEN}
-    volumes:
-      - ${BASE_PATH}/membarr/config:/app/app/config
-      
   #Bazarr - for subtitles. Try to use SRT format if you can rather than PGS due to performance issues
   bazarr:
     container_name: bazarr
@@ -330,24 +316,6 @@ services:
     volumes:
       - ${BASE_PATH}/pal/config:/config
       
-  #Cross Seed - used to take torrents from one tracker and seed them on another without leeching first. Increases ratio
-  #
-  #This is fairly advanced but can be removed if you don't think you will need it. Some trackers also don't allow this
-  cross-seed:
-    image: ghcr.io/cross-seed/cross-seed
-    container_name: cross-seed
-    environment:
-      - PUID=${USER_ID}
-      - PGID=${USER_ID}
-    ports:
-      - "2468:2468" # you'll need this for daemon mode only
-    volumes:
-      - ${BASE_PATH}/cross-seed/config:/config #To configure you have to manually nano the config file
-      - ${BASE_PATH}/qbittorent/config/qBittorrent/BT_backup:/torrents:ro # your torrent clients .torrent cache, can and should be mounted read-only (e.g. qbit: `BT_Backup` | deluge: `state` | transmission: `transmission/torrents` | rtorrent: session dir from `.rtorrent.rc`)
-      - ${UNRAID_SHARE}/cross-seed/current-cross-seeds:/cross-seeds # A place to temp save current cross seed .torrent files
-      #- ${UNRAID_SHARE}/downloads:/data # OPTIONAL!!! this is dataDir path (for data-based matching) - will need to replicate your torrent client's container path (like Arr's do)
-    command: daemon # this enables the search mode, change to daemon to specifically run the daemon
-    
   #Plex Meta Manager - used to create collections in plex. Example: "Most Popular Movies This Week", "Best of horror", etc.
   plex-meta-manager:
     image: meisnate12/plex-meta-manager
