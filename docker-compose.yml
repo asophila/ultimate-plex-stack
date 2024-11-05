@@ -79,37 +79,6 @@ services:
     ports:
       - 8989:8989
     restart: unless-stopped
-  
-  #Readarr - Used to download books
-  readarr:
-    image: lscr.io/linuxserver/readarr:develop
-    container_name: readarr
-    environment:
-      - PUID=${PUID}
-      - PGID=${GUID}
-      - TZ=${TZ}
-    volumes:
-      - ${BASE_PATH}/readarr/config:/config
-      - ${MEDIA_SHARE}:/share 
-
-    ports:
-      - 8787:8787
-    restart: unless-stopped
-    
-  #Lidarr - Used to download music 
-  lidarr:
-    image: lscr.io/linuxserver/lidarr:latest
-    container_name: lidarr
-    environment:
-      - PUID=${PUID}
-      - PGID=${GUID}
-      - TZ=${TZ}
-    volumes:
-      - ${BASE_PATH}/lidarr/config:/config
-      - ${MEDIA_SHARE}:/share 
-    ports:
-      - 8686:8686
-    restart: unless-stopped
     
   #Prowlarr - manages your Sonarr, Radarr and download client
   prowlarr:
@@ -175,19 +144,46 @@ services:
   #Qbittorent - torrenting software
   #
   #You can also use RuTorrent, Transmisson or Deluge
-  qbittorrent:
-    image: lscr.io/linuxserver/qbittorrent:latest
-    container_name: qbittorrent
-    environment:
-      - PUID=${PUID}
-      - PGID=${GUID}
-      - TZ=${TZ}
-      - WEBUI_PORT=8080
-      - TORRENTING_PORT=8694 #Make sure to port forward this port in your router so you can seed more effectively
+  gluetun:
+    image: qmcgaw/gluetun:latest
+    container_name: vpn
+    cap_add:
+      - NET_ADMIN
+    devices:
+      - /dev/net/tun:/dev/net/tun
+    ports:
+      - "${QBIT_PORT:-8080}:8080"
+      # Add additional ports if needed for other services that should go through VPN
     volumes:
-      - ${BASE_PATH}/qbittorent/config:/config
-      - ${MEDIA_SHARE}:/share
+      - ${CONFIG_DIR}/gluetun:/gluetun
+    environment:
+      # NordVPN specific configuration
+      - VPN_SERVICE_PROVIDER=nordvpn
+      - VPN_TYPE=openvpn
+      - OPENVPN_USER=${NORDVPN_USER}
+      - OPENVPN_PASSWORD=${NORDVPN_PASS}
+      # Optional: specify server location
+      - SERVER_COUNTRIES=${NORDVPN_COUNTRY:-Chile}
+      # Recommended: enable killing switch
+      - VPN_ENDPOINT_IP=
+      - FIREWALL=on
+      - DOT=off  # Disable DNS over TLS to reduce overhead
     restart: unless-stopped
+
+  qbittorrent:
+    image: linuxserver/qbittorrent:latest
+    container_name: qbittorrent
+    network_mode: "service:gluetun"  # This makes qBittorrent use the VPN connection
+    environment:
+      <<: *common-vars
+      - WEBUI_PORT=${QBIT_PORT:-8080}
+    volumes:
+      - ${CONFIG_DIR}/qbittorrent:/config
+      - ${DOWNLOAD_DIR}:/downloads
+    restart: unless-stopped
+    depends_on:
+      - gluetun
+
       
   #Tautulli - for plex statistics. Very useful when troubleshooting performance issues
   tautulli:
@@ -204,51 +200,6 @@ services:
     ports:
       - 8181:8181
     restart: unless-stopped
-
-  #Tdarr - to transcode videos from one format to another like x265 or H.265
-  #
-  #This container requires a decent amount of horse power to run but will save space in the long run
-  tdarr:
-    container_name: tdarr
-    image: ghcr.io/haveagitgat/tdarr:latest
-    restart: unless-stopped
-    ports:
-      - 8265:8265 # webUI port
-      - 8266:8266 # server port
-    environment:
-      - TZ=${TZ}
-      - PUID=${PUID}
-      - PGID=${GUID}
-      - UMASK_SET=002
-      - nodeName=ServerNode
-      - serverIP=0.0.0.0
-      - serverPort=8266
-      - webUIPort=8265
-      - internalNode=true
-      - inContainer=true
-      - ffmpegVersion=6
-    volumes:
-      - ${BASE_PATH}/tdarr/server:/app/server
-      - ${BASE_PATH}/tdarr/configs:/app/configs
-      - ${BASE_PATH}/tdarr/logs:/app/logs
-      - ${MEDIA_SHARE}:/media
-      - /transcode_cache:/temp
-    devices:
-     - /dev/dri:/dev/dri #Required for HW transcoding / QuickSync
-     
-  #Membarr - to invite users via discord
-  #
-  #Can be configured so that when a plex member invites an outside user to a discord channel they are auto invited to plex
-  #
-  #Feel free to remove this container if you want to manually invite everyone yourself
-  membarr:
-    container_name: membarr
-    image: yoruio/membarr:latest
-    restart: unless-stopped
-    environment:
-      - token=${MEMBARR_TOKEN}
-    volumes:
-      - ${BASE_PATH}/membarr/config:/app/app/config
       
   #Bazarr - for subtitles. Try to use SRT format if you can rather than PGS due to performance issues
   bazarr:
@@ -277,24 +228,6 @@ services:
       - TZ=${TZ}
     volumes:
       - ${BASE_PATH}/pal/config:/config
-      
-  #Cross Seed - used to take torrents from one tracker and seed them on another without leeching first. Increases ratio
-  #
-  #This is fairly advanced but can be removed if you don't think you will need it. Some trackers also don't allow this
-  cross-seed:
-    image: ghcr.io/cross-seed/cross-seed
-    container_name: cross-seed
-    environment:
-      - PUID=${PUID}
-      - PGID=${GUID}
-    ports:
-      - "2468:2468" # you'll need this for daemon mode only
-    volumes:
-      - ${BASE_PATH}/cross-seed/config:/config #To configure you have to manually nano the config file
-      - ${BASE_PATH}/qbittorent/config/qBittorrent/BT_backup:/torrents:ro # your torrent clients .torrent cache, can and should be mounted read-only (e.g. qbit: `BT_Backup` | deluge: `state` | transmission: `transmission/torrents` | rtorrent: session dir from `.rtorrent.rc`)
-      - ${MEDIA_SHARE}/cross-seed/current-cross-seeds:/cross-seeds # A place to temp save current cross seed .torrent files
-      #- ${MEDIA_SHARE}/downloads:/data # OPTIONAL!!! this is dataDir path (for data-based matching) - will need to replicate your torrent client's container path (like Arr's do)
-    command: daemon # this enables the search mode, change to daemon to specifically run the daemon
     
   #Plex Meta Manager - used to create collections in plex. Example: "Most Popular Movies This Week", "Best of horror", etc.
   plex-meta-manager:
@@ -373,3 +306,57 @@ services:
     environment:
       - TZ=${TZ}
  
+# Netdata - System and Application Monitoring
+  netdata:
+    image: netdata/netdata:latest
+    container_name: netdata
+    pid: host
+    network_mode: host
+    restart: unless-stopped
+    cap_add:
+      - SYS_PTRACE
+      - SYS_ADMIN
+    security_opt:
+      - apparmor:unconfined
+    volumes:
+      - ${BASE_PATH}/netdata/config:/etc/netdata
+      - ${BASE_PATH}/netdata/lib:/var/lib/netdata
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    environment:
+      - PUID=${PUID}
+      - PGID=${GUID}
+      - TZ=${TZ}
+    ports:
+      - 19999:19999
+
+  # Uptime Kuma - Uptime Monitoring
+  uptime-kuma:
+    image: louislam/uptime-kuma:latest
+    container_name: uptime-kuma
+    volumes:
+      - ${BASE_PATH}/uptime-kuma/data:/app/data
+    ports:
+      - 3001:3001
+    restart: unless-stopped
+    environment:
+      - PUID=${PUID}
+      - PGID=${GUID}
+      - TZ=${TZ}
+
+  # WebDAV Server
+  webdav:
+    image: ugeek/webdav:latest
+    container_name: webdav
+    environment:
+      - PUID=${PUID}
+      - PGID=${GUID}
+      - TZ=${TZ}
+      - USERNAME=${WEBDAV_USER}     # Username for WebDAV
+      - PASSWORD=${WEBDAV_PASS}     # Password for WebDAV
+    volumes:
+      - ${MEDIA_SHARE}:/data        # Your files will be accessible here
+    ports:
+      - 8383:8080                   # WebDAV will be accessible on port 8383
+    restart: unless-stopped
