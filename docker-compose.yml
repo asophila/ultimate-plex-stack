@@ -73,7 +73,6 @@ services:
     networks:
       - media_net
     restart: unless-stopped
-    user: "1000:1000"    # Explicitly set user
 
   radarr:
     image: linuxserver/radarr:latest
@@ -91,7 +90,6 @@ services:
     networks:
       - media_net
     restart: unless-stopped
-    user: "1000:1000"    # Explicitly set user
 
   bazarr:
     container_name: bazarr
