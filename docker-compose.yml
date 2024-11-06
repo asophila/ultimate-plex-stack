@@ -205,7 +205,44 @@ services:
       timeout: 10s
       retries: 3
 
+  recyclarr:
+    image: recyclarr/recyclarr:latest
+    container_name: recyclarr
+    environment:
+      - TZ=${TZ}
+    volumes:
+      - recyclarr_config:/config
+    networks:
+      - media_net
+    restart: unless-stopped
+
+  unmanic:
+    image: josh5/unmanic:latest
+    container_name: unmanic
+    devices:
+      - /dev/dri:/dev/dri # Hardware transcoding support (if available)
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
+      - UNMANIC_LIBRARY_PATH=/library # Don't change this
+      - UNMANIC_CACHE_PATH=/tmp/unmanic # Don't change this
+    volumes:
+      - unmanic_config:/config
+      - unmanic_cache:/tmp/unmanic
+      - ${MEDIA_SHARE:-/mnt/showtime}/media:/library/media:rw
+      # Add custom post-processing scripts directory if needed
+      #- ${BASE_PATH}/unmanic/scripts:/scripts
+    ports:
+      - "${UNMANIC_PORT:-8888}:8888"
+    networks:
+      - media_net
+    restart: unless-stopped
+
 volumes:
+  recyclarr_config:
+  unmanic_config:
+  unmanic_cache:
   homarr_configs:
   homarr_icons:
 
