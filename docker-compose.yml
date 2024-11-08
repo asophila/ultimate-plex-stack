@@ -29,7 +29,6 @@ services:
     image: linuxserver/qbittorrent:latest
     container_name: qbittorrent
     network_mode: "service:gluetun"
-    user: "99:101"  # Add this line
     environment:
       - PUID=${PUID}
       - PGID=${PGID}
@@ -61,7 +60,6 @@ services:
   sonarr:
     image: linuxserver/sonarr:latest
     container_name: sonarr
-    user: "99:101"  # Add this line
     environment:
       - PUID=${PUID}
       - PGID=${PGID}
@@ -79,7 +77,6 @@ services:
   radarr:
     image: linuxserver/radarr:latest
     container_name: radarr
-    user: "99:101"  # Add this line
     environment:
       - PUID=${PUID}
       - PGID=${PGID}
