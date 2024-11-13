@@ -241,7 +241,8 @@ services:
       - "${FILEFLOWS_PORT:-19200}:19200"
     group_add:
       - "video"
-      - "render"
+      # Adding render group conditionally
+      - "${RENDER_GROUP:-render}"
     restart: unless-stopped
     networks:
       - media_net
