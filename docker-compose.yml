@@ -240,8 +240,8 @@ services:
     ports:
       - "${FILEFLOWS_PORT:-19200}:19200"
     group_add:
-      - video
-      - render
+      - "44"  # your video group ID
+      - "107" # your render group ID
     devices:
       - /dev/dri:/dev/dri
     restart: unless-stopped
@@ -252,6 +252,7 @@ services:
       interval: 30s
       timeout: 10s
       retries: 3
+
 
 volumes:
   homarr_configs:    # Only keep the volumes that are explicitly used
