@@ -240,9 +240,10 @@ services:
     ports:
       - "${FILEFLOWS_PORT:-19200}:19200"
     group_add:
-      - "video"
-      # Adding render group conditionally
-      - "${RENDER_GROUP:-render}"
+      - video
+      - render
+    devices:
+      - /dev/dri:/dev/dri
     restart: unless-stopped
     networks:
       - media_net
