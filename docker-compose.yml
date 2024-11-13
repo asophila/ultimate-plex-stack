@@ -215,7 +215,7 @@ services:
     networks:
       - media_net
     restart: unless-stopped
-        
+            
   fileflows:
     image: revenz/fileflows:latest
     container_name: fileflows
@@ -224,7 +224,7 @@ services:
       - PGID=${PGID}
       - TZ=${TZ}
       - NODE_NAME=${FILEFLOWS_NODE_NAME:-homeserver}
-      # QSV-specific environment variables we confirmed working
+      # QSV-specific environment variables
       - LIBVA_DRIVER_NAME=i965
       - LIBVA_DRIVERS_PATH=/usr/lib/x86_64-linux-gnu/dri
     volumes:
@@ -252,9 +252,6 @@ services:
       retries: 3
 
 volumes:
-  recyclarr_config:
-  unmanic_config:
-  unmanic_cache:
   homarr_configs:
   homarr_icons:
 
