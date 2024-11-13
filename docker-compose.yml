@@ -211,51 +211,39 @@ services:
     environment:
       - TZ=${TZ}
     volumes:
-      - ${BASE_PATH}/recyclarr:/config    # Changed from named volume to path-based volume
+      - recyclarr_config:/config
     networks:
       - media_net
     restart: unless-stopped
-        
-  fileflows:
-    image: revenz/fileflows:latest
-    container_name: fileflows
+
+  unmanic:
+    image: josh5/unmanic:latest
+    container_name: unmanic
+    devices:
+      - /dev/dri:/dev/dri # Hardware transcoding support (if available)
     environment:
       - PUID=${PUID}
       - PGID=${PGID}
       - TZ=${TZ}
-      - NODE_NAME=${FILEFLOWS_NODE_NAME:-homeserver}
-      # QSV-specific environment variables
-      - LIBVA_DRIVER_NAME=i965
-      - LIBVA_DRIVERS_PATH=/usr/lib/x86_64-linux-gnu/dri
+      - UNMANIC_LIBRARY_PATH=/library # Don't change this
+      - UNMANIC_CACHE_PATH=/tmp/unmanic # Don't change this
     volumes:
-      - ${BASE_PATH}/fileflows/data:/app/Data
-      - ${BASE_PATH}/fileflows/logs:/app/Logs
-      - ${BASE_PATH}/fileflows/temp:/temp
-      - ${MEDIA_SHARE:-/mnt/showtime}/movies:/media/movies:rw
-      - ${MEDIA_SHARE:-/mnt/showtime}/tv:/media/tv:rw
-      - ${DOWNLOAD_DIR:-/mnt/showtime/downloads}:/media/incoming:rw
-      # QSV-specific mounts
-      - /dev/dri:/dev/dri
-      - /usr/lib/x86_64-linux-gnu/dri:/usr/lib/x86_64-linux-gnu/dri:ro
+      - unmanic_config:/config
+      - unmanic_cache:/tmp/unmanic
+      - ${MEDIA_SHARE:-/mnt/showtime}:/library/media:rw
+      # Add custom post-processing scripts directory if needed
+      #- ${BASE_PATH}/unmanic/scripts:/scripts
     ports:
-      - "${FILEFLOWS_PORT:-19200}:19200"
-    group_add:
-      - "44"  # your video group ID
-      - "107" # your render group ID
-    devices:
-      - /dev/dri:/dev/dri
-    restart: unless-stopped
+      - "${UNMANIC_PORT:-8888}:8888"
     networks:
       - media_net
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:19200/"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-
+    restart: unless-stopped
 
 volumes:
-  homarr_configs:    # Only keep the volumes that are explicitly used
+  recyclarr_config:
+  unmanic_config:
+  unmanic_cache:
+  homarr_configs:
   homarr_icons:
 
 networks:
