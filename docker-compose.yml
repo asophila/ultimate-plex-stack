@@ -211,11 +211,11 @@ services:
     environment:
       - TZ=${TZ}
     volumes:
-      - recyclarr_config:/config
+      - ${BASE_PATH}/recyclarr:/config    # Changed from named volume to path-based volume
     networks:
       - media_net
     restart: unless-stopped
-            
+        
   fileflows:
     image: revenz/fileflows:latest
     container_name: fileflows
@@ -252,7 +252,7 @@ services:
       retries: 3
 
 volumes:
-  homarr_configs:
+  homarr_configs:    # Only keep the volumes that are explicitly used
   homarr_icons:
 
 networks:
