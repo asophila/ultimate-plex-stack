@@ -205,7 +205,7 @@ services:
     networks:
       - media_net
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:7575/"]
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:7575"]
       interval: 30s
       timeout: 10s
       retries: 3
