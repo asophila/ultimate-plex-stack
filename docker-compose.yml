@@ -2,7 +2,7 @@ version: "3.8"
 
 services:
   # === Download Stack ===
-gluetun:
+  gluetun:
     image: qmcgaw/gluetun:latest
     container_name: vpn
     cap_add:
