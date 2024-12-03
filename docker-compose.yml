@@ -1,5 +1,10 @@
 version: "3.8"
 
+x-common-vars: &common-vars
+  PUID: ${PUID}
+  PGID: ${PGID}
+  TZ: ${TZ}
+
 services:
   # === Download Stack ===
   gluetun:
@@ -20,10 +25,14 @@ services:
       - DOT=off
       - LOG_LEVEL=info
       - UPDATER_PERIOD=24h
-      # Health check optimizations
       - HEALTH_TARGET_ADDRESS=1.1.1.1:443
       - HEALTH_READ_TIMEOUT=2s
       - HEALTH_WAIT_DURATION=10s
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 100M
     volumes:
       - ${CONFIG_DIR:-./config}/gluetun:/gluetun
     networks:
@@ -41,13 +50,16 @@ services:
     container_name: qbittorrent
     network_mode: "service:gluetun"
     environment:
-      - PUID=${PUID}
-      - PGID=${PGID}
-      - TZ=${TZ}
+      <<: *common-vars
       - WEBUI_PORT=${QBIT_PORT:-8080}
+    deploy:
+      resources:
+        limits:
+          cpus: '1'
+          memory: 200M
     volumes:
       - ${BASE_PATH}/qbittorrent:/config
-      - ${DOWNLOAD_DIR}:/downloads
+      - ${DOWNLOAD_DIR}:/downloads:cached
     restart: unless-stopped
     depends_on:
       - gluetun
@@ -57,9 +69,12 @@ services:
     image: linuxserver/prowlarr:latest
     container_name: prowlarr
     environment:
-      - PUID=${PUID}
-      - PGID=${PGID}
-      - TZ=${TZ}
+      <<: *common-vars
+    deploy:
+      resources:
+        limits:
+          cpus: '0.3'
+          memory: 150M
     volumes:
       - ${BASE_PATH}/prowlarr:/config
     ports:
@@ -72,13 +87,16 @@ services:
     image: linuxserver/sonarr:latest
     container_name: sonarr
     environment:
-      - PUID=${PUID}
-      - PGID=${PGID}
-      - TZ=${TZ}
+      <<: *common-vars
+    deploy:
+      resources:
+        limits:
+          cpus: '0.8'
+          memory: 350M
     volumes:
       - ${BASE_PATH}/sonarr:/config
-      - ${MEDIA_SHARE}:/media
-      - ${DOWNLOAD_DIR}:/downloads
+      - ${MEDIA_SHARE}:/media:cached
+      - ${DOWNLOAD_DIR}:/downloads:cached
     ports:
       - "${SONARR_PORT:-8989}:8989"
     networks:
@@ -89,13 +107,16 @@ services:
     image: linuxserver/radarr:latest
     container_name: radarr
     environment:
-      - PUID=${PUID}
-      - PGID=${PGID}
-      - TZ=${TZ}
+      <<: *common-vars
+    deploy:
+      resources:
+        limits:
+          cpus: '0.8'
+          memory: 350M
     volumes:
       - ${BASE_PATH}/radarr:/config
-      - ${MEDIA_SHARE}:/media
-      - ${DOWNLOAD_DIR}:/downloads
+      - ${MEDIA_SHARE}:/media:cached
+      - ${DOWNLOAD_DIR}:/downloads:cached
     ports:
       - "${RADARR_PORT:-7878}:7878"
     networks:
@@ -106,12 +127,15 @@ services:
     container_name: bazarr
     image: linuxserver/bazarr:latest
     environment:
-      - PUID=${PUID}
-      - PGID=${PGID}
-      - TZ=${TZ}
+      <<: *common-vars
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 500M
     volumes:
       - ${BASE_PATH}/bazarr:/config
-      - ${MEDIA_SHARE:-/mnt/showtime}:/media
+      - ${MEDIA_SHARE}:/media:cached
     ports:
       - "${BAZARR_PORT:-6767}:6767"
     networks:
@@ -124,33 +148,39 @@ services:
     container_name: plex
     network_mode: host
     environment:
-      - PUID=${PUID}
-      - PGID=${PGID}
-      - TZ=${TZ}
+      <<: *common-vars
       - VERSION=docker
       - PLEX_CLAIM=${PLEX_CLAIM}
+    deploy:
+      resources:
+        limits:
+          cpus: '2'
+          memory: 2G
     volumes:
       - ${BASE_PATH}/plex/config:/config
-      - ${MEDIA_SHARE}/tv:/tv
-      - ${MEDIA_SHARE}/movies:/movies
+      - ${MEDIA_SHARE}/tv:/tv:ro,cached
+      - ${MEDIA_SHARE}/movies:/movies:ro,cached
     restart: unless-stopped
 
   jellyfin:
     image: jellyfin/jellyfin:latest
     container_name: jellyfin
-    network_mode: host  # Better for old hardware/transcoding
+    network_mode: host
     environment:
-      - PUID=${PUID}
-      - PGID=${PGID}
-      - TZ=${TZ}
+      <<: *common-vars
+    deploy:
+      resources:
+        limits:
+          cpus: '2'
+          memory: 2G
     volumes:
       - ${BASE_PATH}/jellyfin/config:/config
       - ${BASE_PATH}/jellyfin/cache:/cache
-      - ${MEDIA_SHARE}/movies:/movies
-      - ${MEDIA_SHARE}/tv:/tv
+      - ${MEDIA_SHARE}/movies:/movies:ro,cached
+      - ${MEDIA_SHARE}/tv:/tv:ro,cached
     restart: unless-stopped
 
-  # === Optional Services ===
+  # === Optional Services with Reduced Resources ===
   flaresolverr:
     image: ghcr.io/flaresolverr/flaresolverr:latest
     container_name: flaresolverr
@@ -159,6 +189,11 @@ services:
       - LOG_HTML=false
       - CAPTCHA_SOLVER=none
       - TZ=${TZ}
+    deploy:
+      resources:
+        limits:
+          cpus: '0.3'
+          memory: 150M
     ports:
       - "8191:8191"
     networks:
@@ -169,9 +204,12 @@ services:
     image: lscr.io/linuxserver/overseerr:latest
     container_name: overseerr
     environment:
-      - PUID=${PUID}
-      - PGID=${PGID}
-      - TZ=${TZ}
+      <<: *common-vars
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 300M
     volumes:
       - ${BASE_PATH}/overseerr:/config
     ports:
@@ -180,47 +218,16 @@ services:
       - media_net
     restart: unless-stopped
 
-  unpackerr:
-    image: golift/unpackerr
-    container_name: unpackerr
-    volumes:
-      - ${MEDIA_SHARE:-/mnt/showtime}:/share
-    restart: unless-stopped
-    user: ${PUID}:${PGID}
-    environment:
-      - TZ=${TZ}
-      - UN_SONARR_0_URL=http://sonarr:8989
-      - UN_SONARR_0_API_KEY=${SONARR_KEY}
-      - UN_RADARR_0_URL=http://radarr:7878
-      - UN_RADARR_0_API_KEY=${RADARR_KEY}
-    networks:
-      - media_net
-      
-  homarr:
-    container_name: homarr
-    image: ghcr.io/ajnart/homarr:latest
-    restart: unless-stopped
-    volumes:
-      - ${BASE_PATH}/homarr/configs:/app/data/configs
-      - ${BASE_PATH}/homarr/icons:/app/public/icons
-      - /var/run/docker.sock:/var/run/docker.sock:ro
-    ports:
-      - ${HOMARR_PORT:-7575}:7575
-    environment:
-      - TZ=${TZ}
-    networks:
-      - media_net
-    healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:7575"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-
   recyclarr:
     image: recyclarr/recyclarr:latest
     container_name: recyclarr
     environment:
       - TZ=${TZ}
+    deploy:
+      resources:
+        limits:
+          cpus: '0.2'
+          memory: 100M
     volumes:
       - recyclarr_config:/config
     networks:
@@ -229,8 +236,6 @@ services:
 
 volumes:
   recyclarr_config:
-  homarr_configs:
-  homarr_icons:
 
 networks:
   media_net:
