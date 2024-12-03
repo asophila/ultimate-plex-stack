@@ -18,15 +18,19 @@ services:
       - SERVER_COUNTRIES=Netherlands
       - FIREWALL=on
       - DOT=off
-      - LOG_LEVEL=debug  # Temporarily set to debug to see more info
+      - LOG_LEVEL=info
       - UPDATER_PERIOD=24h
+      # Health check optimizations
+      - HEALTH_TARGET_ADDRESS=1.1.1.1:443
+      - HEALTH_READ_TIMEOUT=2s
+      - HEALTH_WAIT_DURATION=10s
     volumes:
       - ${CONFIG_DIR:-./config}/gluetun:/gluetun
     networks:
       - media_net
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "wget", "-qO-", "https://cloudflare.com/cdn-cgi/trace"]
+      test: ["CMD", "wget", "-qO-", "--dns-timeout=2", "--connect-timeout=2", "https://1.1.1.1/cdn-cgi/trace"]
       interval: 30s
       timeout: 10s
       retries: 3
