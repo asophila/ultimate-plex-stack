@@ -18,17 +18,15 @@ services:
       - SERVER_COUNTRIES=Netherlands
       - FIREWALL=on
       - DOT=off
-      - LOG_LEVEL=info
+      - LOG_LEVEL=debug  # Temporarily set to debug to see more info
       - UPDATER_PERIOD=24h
-      - WIREGUARD_ENDPOINT_PORT=51820  # Changed from VPN_ENDPOINT_PORT
-      - HEALTH_SERVER_ADDRESS=1.1.1.1:443  # Added port
     volumes:
       - ${CONFIG_DIR:-./config}/gluetun:/gluetun
     networks:
       - media_net
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "wget", "-qO-", "https://1.1.1.1:443"]
+      test: ["CMD", "wget", "-qO-", "https://cloudflare.com/cdn-cgi/trace"]
       interval: 30s
       timeout: 10s
       retries: 3
