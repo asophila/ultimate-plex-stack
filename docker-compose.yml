@@ -30,7 +30,6 @@ services:
       resources:
         limits:
           cpus: '0.5'
-          memory: 100M
     volumes:
       - ${CONFIG_DIR:-./config}/gluetun:/gluetun
     networks:
@@ -56,7 +55,7 @@ services:
       resources:
         limits:
           cpus: '1'
-          memory: 200M
+          memory: 2G
     volumes:
       - ${BASE_PATH}/qbittorrent:/config
       - ${DOWNLOAD_DIR}:/downloads:cached
@@ -76,7 +75,7 @@ services:
       resources:
         limits:
           cpus: '0.3'
-          memory: 150M
+          memory: 900M
     volumes:
       - ${BASE_PATH}/prowlarr:/config
     ports:
@@ -96,7 +95,7 @@ services:
       resources:
         limits:
           cpus: '0.8'
-          memory: 350M
+          memory: 900M
     volumes:
       - ${BASE_PATH}/sonarr:/config
       - ${MEDIA_SHARE}:/media:cached
@@ -118,7 +117,7 @@ services:
       resources:
         limits:
           cpus: '0.8'
-          memory: 350M
+          memory: 900M
     volumes:
       - ${BASE_PATH}/radarr:/config
       - ${MEDIA_SHARE}:/media:cached
@@ -223,7 +222,7 @@ services:
       resources:
         limits:
           cpus: '0.5'
-          memory: 300M
+          memory: 900M
     volumes:
       - ${BASE_PATH}/overseerr:/config
     ports:
