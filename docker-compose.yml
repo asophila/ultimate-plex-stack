@@ -19,18 +19,16 @@ services:
       - FIREWALL=on
       - DOT=off
       - LOG_LEVEL=info
-      # Add these for stability
-      - UPDATER_PERIOD=24h        # Check for new servers daily instead of hourly
-      - VPN_ENDPOINT_PORT=51820   # Lock to standard Wireguard port
-      - VPN_PORT_FORWARDING=off   # Disable if you don't need it
-      - HEALTH_SERVER_ADDRESS=1.1.1.1  # Use Cloudflare DNS for health checks
-      # Optional: Lock to a specific server if you find a good one
-      # - WIREGUARD_ADDRESSES=your.preferred.ip/32
+      - UPDATER_PERIOD=24h
+      - WIREGUARD_ENDPOINT_PORT=51820  # Changed from VPN_ENDPOINT_PORT
+      - HEALTH_SERVER_ADDRESS=1.1.1.1:443  # Added port
+    volumes:
+      - ${CONFIG_DIR:-./config}/gluetun:/gluetun
     networks:
       - media_net
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "wget", "-qO-", "https://1.1.1.1"]
+      test: ["CMD", "wget", "-qO-", "https://1.1.1.1:443"]
       interval: 30s
       timeout: 10s
       retries: 3
