@@ -13,9 +13,8 @@ services:
       - "${QBIT_PORT:-8080}:8080"
     environment:
       - VPN_SERVICE_PROVIDER=nordvpn
-      - VPN_TYPE=openvpn
-      - OPENVPN_USER=${NORDVPN_USER}
-      - OPENVPN_PASSWORD=${NORDVPN_PASS}
+      - VPN_TYPE=wireguard
+      - WIREGUARD_PRIVATE_KEY=w4oPXZl3GPGNDddKZMgiWxnqsuyjx6GCsoRNKM8S2UI=
       - SERVER_COUNTRIES=${NORDVPN_COUNTRY}
       - FIREWALL=on
       - DOT=off
