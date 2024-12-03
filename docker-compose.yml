@@ -1,10 +1,5 @@
 version: "3.8"
 
-x-common-vars: &common-vars
-  PUID: ${PUID}
-  PGID: ${PGID}
-  TZ: ${TZ}
-
 services:
   # === Download Stack ===
   gluetun:
@@ -17,10 +12,13 @@ services:
     ports:
       - "${QBIT_PORT:-8080}:8080"
     environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
       - VPN_SERVICE_PROVIDER=nordvpn
       - VPN_TYPE=wireguard
       - WIREGUARD_PRIVATE_KEY=${WIREGUARD_PRIVATE_KEY}
-      - SERVER_COUNTRIES=Netherlands
+      - SERVER_COUNTRIES=${NORDVPN_COUNTRY}
       - FIREWALL=on
       - DOT=off
       - LOG_LEVEL=info
@@ -50,7 +48,9 @@ services:
     container_name: qbittorrent
     network_mode: "service:gluetun"
     environment:
-      <<: *common-vars
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
       - WEBUI_PORT=${QBIT_PORT:-8080}
     deploy:
       resources:
@@ -69,7 +69,9 @@ services:
     image: linuxserver/prowlarr:latest
     container_name: prowlarr
     environment:
-      <<: *common-vars
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
     deploy:
       resources:
         limits:
@@ -87,7 +89,9 @@ services:
     image: linuxserver/sonarr:latest
     container_name: sonarr
     environment:
-      <<: *common-vars
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
     deploy:
       resources:
         limits:
@@ -107,7 +111,9 @@ services:
     image: linuxserver/radarr:latest
     container_name: radarr
     environment:
-      <<: *common-vars
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
     deploy:
       resources:
         limits:
@@ -127,7 +133,9 @@ services:
     container_name: bazarr
     image: linuxserver/bazarr:latest
     environment:
-      <<: *common-vars
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
     deploy:
       resources:
         limits:
@@ -148,7 +156,9 @@ services:
     container_name: plex
     network_mode: host
     environment:
-      <<: *common-vars
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
       - VERSION=docker
       - PLEX_CLAIM=${PLEX_CLAIM}
     deploy:
@@ -167,7 +177,9 @@ services:
     container_name: jellyfin
     network_mode: host
     environment:
-      <<: *common-vars
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
     deploy:
       resources:
         limits:
@@ -180,7 +192,7 @@ services:
       - ${MEDIA_SHARE}/tv:/tv:ro,cached
     restart: unless-stopped
 
-  # === Optional Services with Reduced Resources ===
+  # === Optional Services ===
   flaresolverr:
     image: ghcr.io/flaresolverr/flaresolverr:latest
     container_name: flaresolverr
@@ -204,7 +216,9 @@ services:
     image: lscr.io/linuxserver/overseerr:latest
     container_name: overseerr
     environment:
-      <<: *common-vars
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
     deploy:
       resources:
         limits:
