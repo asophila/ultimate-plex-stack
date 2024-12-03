@@ -248,8 +248,54 @@ services:
       - media_net
     restart: unless-stopped
 
+  netdata:
+    image: netdata/netdata:latest
+    container_name: netdata
+    pid: host
+    network_mode: host
+    restart: unless-stopped
+    environment:
+      - TZ=${TZ}
+    cap_add:
+      - SYS_PTRACE
+      - SYS_ADMIN
+    security_opt:
+      - apparmor:unconfined
+    deploy:
+      resources:
+        limits:
+          cpus: '1'
+          memory: 512M
+    volumes:
+      - netdataconfig:/etc/netdata
+      - netdatalib:/var/lib/netdata
+      - netdatacache:/var/cache/netdata
+      - /:/host/root:ro,rslave
+      - /etc/passwd:/host/etc/passwd:ro
+      - /etc/group:/host/etc/group:ro
+      - /etc/localtime:/etc/localtime:ro
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /etc/os-release:/host/etc/os-release:ro
+      - /var/log:/host/var/log:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      # Add mergerfs monitoring
+      - /mnt/showtime:/host/mnt/showtime:ro
+    environment:
+      - DOCKER_HOST=unix:///var/run/docker.sock
+      # Optimize for lower resource usage
+      - NETDATA_RUNTIME_MEMORY_MODE=dbengine
+      - NETDATA_UPDATE_EVERY=5
+      - NETDATA_HISTORY_DAYS=7
+      # Focus on media-related metrics
+      - NETDATA_MONITORING_DISKS=/dev/sd*,/mnt/showtime
+      - NETDATA_MONITORING_SERVICES=plex*,jellyfin*,qbittorrent*,sonarr*,radarr*
+
 volumes:
   recyclarr_config:
+  netdataconfig:
+  netdatalib:
+  netdatacache:
 
 networks:
   media_net:
