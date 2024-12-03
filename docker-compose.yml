@@ -256,6 +256,14 @@ services:
     restart: unless-stopped
     environment:
       - TZ=${TZ}
+      - DOCKER_HOST=unix:///var/run/docker.sock
+      # Optimize for lower resource usage
+      - NETDATA_RUNTIME_MEMORY_MODE=dbengine
+      - NETDATA_UPDATE_EVERY=5
+      - NETDATA_HISTORY_DAYS=7
+      # Focus on media-related metrics
+      - NETDATA_MONITORING_DISKS=/dev/sd*,/mnt/showtime
+      - NETDATA_MONITORING_SERVICES=plex*,jellyfin*,qbittorrent*,sonarr*,radarr*
     cap_add:
       - SYS_PTRACE
       - SYS_ADMIN
@@ -281,15 +289,7 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock:ro
       # Add mergerfs monitoring
       - /mnt/showtime:/host/mnt/showtime:ro
-    environment:
-      - DOCKER_HOST=unix:///var/run/docker.sock
-      # Optimize for lower resource usage
-      - NETDATA_RUNTIME_MEMORY_MODE=dbengine
-      - NETDATA_UPDATE_EVERY=5
-      - NETDATA_HISTORY_DAYS=7
-      # Focus on media-related metrics
-      - NETDATA_MONITORING_DISKS=/dev/sd*,/mnt/showtime
-      - NETDATA_MONITORING_SERVICES=plex*,jellyfin*,qbittorrent*,sonarr*,radarr*
+
 
 volumes:
   recyclarr_config:
