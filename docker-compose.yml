@@ -26,10 +26,6 @@ services:
       - HEALTH_TARGET_ADDRESS=1.1.1.1:443
       - HEALTH_READ_TIMEOUT=2s
       - HEALTH_WAIT_DURATION=10s
-    deploy:
-      resources:
-        limits:
-          cpus: '0.5'
     volumes:
       - ${CONFIG_DIR:-./config}/gluetun:/gluetun
     networks:
@@ -51,11 +47,6 @@ services:
       - PGID=${PGID}
       - TZ=${TZ}
       - WEBUI_PORT=${QBIT_PORT:-8080}
-    deploy:
-      resources:
-        limits:
-          cpus: '1'
-          memory: 2G
     volumes:
       - ${BASE_PATH}/qbittorrent:/config
       - ${DOWNLOAD_DIR}:/downloads:cached
@@ -71,11 +62,6 @@ services:
       - PUID=${PUID}
       - PGID=${PGID}
       - TZ=${TZ}
-    deploy:
-      resources:
-        limits:
-          cpus: '0.3'
-          memory: 900M
     volumes:
       - ${BASE_PATH}/prowlarr:/config
     ports:
@@ -91,11 +77,6 @@ services:
       - PUID=${PUID}
       - PGID=${PGID}
       - TZ=${TZ}
-    deploy:
-      resources:
-        limits:
-          cpus: '0.8'
-          memory: 900M
     volumes:
       - ${BASE_PATH}/sonarr:/config
       - ${MEDIA_SHARE}:/media:cached
@@ -113,11 +94,6 @@ services:
       - PUID=${PUID}
       - PGID=${PGID}
       - TZ=${TZ}
-    deploy:
-      resources:
-        limits:
-          cpus: '0.8'
-          memory: 900M
     volumes:
       - ${BASE_PATH}/radarr:/config
       - ${MEDIA_SHARE}:/media:cached
@@ -135,11 +111,6 @@ services:
       - PUID=${PUID}
       - PGID=${PGID}
       - TZ=${TZ}
-    deploy:
-      resources:
-        limits:
-          cpus: '0.5'
-          memory: 500M
     volumes:
       - ${BASE_PATH}/bazarr:/config
       - ${MEDIA_SHARE}:/media:cached
@@ -160,11 +131,6 @@ services:
       - TZ=${TZ}
       - VERSION=docker
       - PLEX_CLAIM=${PLEX_CLAIM}
-    deploy:
-      resources:
-        limits:
-          cpus: '2'
-          memory: 2G
     volumes:
       - ${BASE_PATH}/plex/config:/config
       - ${MEDIA_SHARE}/tv:/tv:ro,cached
@@ -179,11 +145,6 @@ services:
       - PUID=${PUID}
       - PGID=${PGID}
       - TZ=${TZ}
-    deploy:
-      resources:
-        limits:
-          cpus: '2'
-          memory: 2G
     volumes:
       - ${BASE_PATH}/jellyfin/config:/config
       - ${BASE_PATH}/jellyfin/cache:/cache
@@ -200,11 +161,6 @@ services:
       - LOG_HTML=false
       - CAPTCHA_SOLVER=none
       - TZ=${TZ}
-    deploy:
-      resources:
-        limits:
-          cpus: '0.3'
-          memory: 150M
     ports:
       - "8191:8191"
     networks:
@@ -218,11 +174,6 @@ services:
       - PUID=${PUID}
       - PGID=${PGID}
       - TZ=${TZ}
-    deploy:
-      resources:
-        limits:
-          cpus: '0.5'
-          memory: 900M
     volumes:
       - ${BASE_PATH}/overseerr:/config
     ports:
@@ -236,11 +187,6 @@ services:
     container_name: recyclarr
     environment:
       - TZ=${TZ}
-    deploy:
-      resources:
-        limits:
-          cpus: '0.2'
-          memory: 100M
     volumes:
       - recyclarr_config:/config
     networks:
@@ -268,11 +214,6 @@ services:
       - SYS_ADMIN
     security_opt:
       - apparmor:unconfined
-    deploy:
-      resources:
-        limits:
-          cpus: '1'
-          memory: 512M
     volumes:
       - netdataconfig:/etc/netdata
       - netdatalib:/var/lib/netdata
