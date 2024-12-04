@@ -126,16 +126,26 @@ services:
     container_name: plex
     network_mode: host
     environment:
-      - PUID=${PUID}
-      - PGID=${PGID}
+      - PUID=1000
+      - PGID=1000
       - TZ=${TZ}
       - VERSION=docker
       - PLEX_CLAIM=${PLEX_CLAIM}
+      # Add these debugging options
+      - NVIDIA_DRIVER_CAPABILITIES=all
+      - NVIDIA_VISIBLE_DEVICES=all
+      - PLEX_DEBUG=1
+      - PLEX_MEDIA_SERVER_USE_SYSLOG=true
     volumes:
       - ${BASE_PATH}/plex/config:/config
       - ${MEDIA_SHARE}/tv:/tv:ro,cached
       - ${MEDIA_SHARE}/movies:/movies:ro,cached
+      # Add these device mappings
+      - /dev/dri:/dev/dri
+    devices:
+      - /dev/dri:/dev/dri
     restart: unless-stopped
+    privileged: true  # Add this temporarily for debugging
 
   jellyfin:
     image: jellyfin/jellyfin:latest
