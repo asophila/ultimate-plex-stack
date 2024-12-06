@@ -150,17 +150,32 @@ services:
   jellyfin:
     image: jellyfin/jellyfin:latest
     container_name: jellyfin
-    network_mode: host
     environment:
       - PUID=${PUID}
       - PGID=${PGID}
       - TZ=${TZ}
+      # Add specific Jellyfin environment variables
+      - JELLYFIN_CONFIG_DIR=/config/config
+      - JELLYFIN_DATA_DIR=/config
+      - JELLYFIN_CACHE_DIR=/cache
+      - JELLYFIN_LOG_DIR=/config/log
     volumes:
       - ${BASE_PATH}/jellyfin/config:/config
       - ${BASE_PATH}/jellyfin/cache:/cache
       - ${MEDIA_SHARE}/movies:/movies:ro,cached
       - ${MEDIA_SHARE}/tv:/tv:ro,cached
+    ports:
+      - "${JELLYFIN_PORT:-8096}:8096"
+      - "7359:7359/udp"  # Local network discovery
+      - "1900:1900/udp"  # DLNA
+    networks:
+      - media_net
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8096/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
 
   # === Optional Services ===
   flaresolverr:
