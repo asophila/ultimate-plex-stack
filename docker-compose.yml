@@ -162,14 +162,14 @@ services:
     volumes:
       - ${BASE_PATH}/jellyfin/config:/config
       - ${BASE_PATH}/jellyfin/cache:/cache
-      - ${MEDIA_SHARE}/movies:/movies:ro,cached
-      - ${MEDIA_SHARE}/tv:/tv:ro,cached
+      - ${MEDIA_SHARE}/media:/media:ro,cached
     ports:
       - "${JELLYFIN_PORT:-8096}:8096"
       - "7359:7359/udp"  # Local network discovery
       - "1900:1900/udp"  # DLNA
     networks:
       - media_net
+    restart: unless-stopped
 
   # === Optional Services ===
   flaresolverr:
