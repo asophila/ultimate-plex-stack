@@ -170,12 +170,6 @@ services:
       - "1900:1900/udp"  # DLNA
     networks:
       - media_net
-    restart: unless-stopped
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8096/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
 
   # === Optional Services ===
   flaresolverr:
