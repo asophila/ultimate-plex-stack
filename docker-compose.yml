@@ -215,6 +215,21 @@ services:
       - media_net
     restart: unless-stopped
 
+  dashy:
+    image: lissy93/dashy:latest
+    container_name: dashy
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
+    volumes:
+      - ${BASE_PATH}/dashy:/app/public
+    ports:
+      - "${DASHY_PORT:-4000}:80"
+    networks:
+      - media_net
+    restart: unless-stopped
+
   netdata:
     image: netdata/netdata:latest
     container_name: netdata
