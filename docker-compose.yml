@@ -270,7 +270,7 @@ services:
       - TZ=${TZ}
     volumes:
       - ${BASE_PATH}/filebrowser/database:/database
-      - ${BASE_PATH}/filebrowser/config:/.filebrowser.json
+      - ${BASE_PATH}/filebrowser/config:/config
       - ${MEDIA_SHARE}:/srv/media:ro
       - ${DOWNLOAD_DIR}:/srv/downloads
     ports:
@@ -280,7 +280,7 @@ services:
     restart: unless-stopped
     security_opt:
       - no-new-privileges:true
-    # Optional but recommended health check
+    command: --database /database/filebrowser.db --config /config/filebrowser.json
     healthcheck:
       test: ["CMD", "wget", "--spider", "-q", "http://localhost:80"]
       interval: 1m
