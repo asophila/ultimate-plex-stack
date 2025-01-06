@@ -219,15 +219,23 @@ services:
     image: lissy93/dashy:latest
     container_name: dashy
     environment:
-      - PUID=${PUID}
-      - PGID=${PGID}
+      - NODE_ENV=production
+      - UID=${PUID}
+      - GID=${PGID}
       - TZ=${TZ}
     volumes:
-      - ${BASE_PATH}/dashy:/app/public
+      - ${BASE_PATH}/dashy/conf.yml:/app/public/conf.yml
+      - ${BASE_PATH}/dashy/item-icons:/app/public/item-icons  # For custom icons
     ports:
-      - "${DASHY_PORT:-4000}:80"
+      - "${DASHY_PORT:-4000}:8080"
     networks:
       - media_net
+    healthcheck:
+      test: ['CMD', 'node', '/app/services/healthcheck']
+      interval: 1m30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
     restart: unless-stopped
 
   netdata:
