@@ -204,6 +204,29 @@ services:
       - media_net
     restart: unless-stopped
 
+  maintainerr:
+    image: ghcr.io/jorenn92/maintainerr:latest
+    container_name: maintainerr
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
+      - UI_PORT=${MAINTAINERR_PORT:-6246}
+      - API_PORT=${MAINTAINERR_API_PORT:-3001}
+    volumes:
+      - ${BASE_PATH}/maintainerr:/opt/data
+    ports:
+      - "${MAINTAINERR_PORT:-6246}:6246"
+    networks:
+      - media_net
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:${MAINTAINERR_PORT:-6246}/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
   recyclarr:
     image: recyclarr/recyclarr:latest
     container_name: recyclarr
