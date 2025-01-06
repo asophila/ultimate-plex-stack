@@ -207,14 +207,13 @@ services:
   maintainerr:
     image: ghcr.io/jorenn92/maintainerr:latest
     container_name: maintainerr
+    user: ${PUID}:${PGID}
     environment:
-      - PUID=${PUID}
-      - PGID=${PGID}
       - TZ=${TZ}
       - UI_PORT=${MAINTAINERR_PORT:-6246}
       - API_PORT=${MAINTAINERR_API_PORT:-3001}
     volumes:
-      - ${BASE_PATH}/maintainerr:/opt/data
+      - ${BASE_PATH}/maintainerr:/opt/data:rw
     ports:
       - "${MAINTAINERR_PORT:-6246}:6246"
     networks:
