@@ -271,7 +271,7 @@ services:
     volumes:
       - ${BASE_PATH}/filebrowser/database:/database
       - ${BASE_PATH}/filebrowser/config:/config
-      - ${MEDIA_SHARE}:/srv/media:ro
+      - ${FILEBROWSER_ROOT}:/srv/media:ro
       - ${DOWNLOAD_DIR}:/srv/downloads
     ports:
       - "${FILEBROWSER_PORT:-8090}:80"
