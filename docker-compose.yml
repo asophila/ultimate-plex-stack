@@ -260,6 +260,52 @@ services:
       start_period: 40s
     restart: unless-stopped
 
+  # === Monitoring Services ===
+  scrutiny:
+    container_name: scrutiny
+    image: ghcr.io/analogj/scrutiny:master-omnibus
+    cap_add:
+      - SYS_RAWIO
+      - SYS_ADMIN
+      - SYS_MODULE
+    security_opt:
+      - no-new-privileges:true
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
+      - DEBUG=${SCRUTINY_DEBUG:-false}
+      - COLLECTOR_LOG_FILE=/opt/scrutiny/log/collector.log
+      - COLLECTOR_CRON_SCHEDULE=${SCRUTINY_CRON:-"0 0 * * *"}
+      - COLLECTOR_LOW_MEMORY=true
+      - SMARTCTL_TIMEOUT=120
+      - COLLECTOR_CUSTOM_SMARTCTL=true
+    ports:
+      - "${SCRUTINY_PORT:-8289}:8080"
+      - "${SCRUTINY_INFLUX_PORT:-8086}:8086"
+    volumes:
+      - /run/udev:/run/udev:ro
+      - /sys/module:/sys/module
+      - ${CONFIG_DIR}/scrutiny:/opt/scrutiny/config
+      - ${CONFIG_DIR}/scrutiny/influxdb:/opt/scrutiny/influxdb
+      - ${CONFIG_DIR}/scrutiny/logs:/opt/scrutiny/log
+    devices:
+      - /dev/sda:/dev/sda
+      - /dev/sdb:/dev/sdb
+      - /dev/sdc:/dev/sdc
+      - /dev/sdd:/dev/sdd
+      - /dev/sde:/dev/sde
+      - /dev/nvme0:/dev/nvme0
+    networks:
+      - media_net
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    restart: unless-stopped
+
   filebrowser:
     image: filebrowser/filebrowser:latest
     container_name: filebrowser
