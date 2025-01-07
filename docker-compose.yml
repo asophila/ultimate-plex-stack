@@ -260,8 +260,7 @@ services:
       start_period: 40s
     restart: unless-stopped
 
-  # === Monitoring Services ===
-  scrutiny:
+scrutiny:
     container_name: scrutiny
     image: ghcr.io/analogj/scrutiny:master-omnibus
     cap_add:
@@ -286,9 +285,9 @@ services:
     volumes:
       - /run/udev:/run/udev:ro
       - /sys/module:/sys/module
-      - ${CONFIG_DIR}/scrutiny:/opt/scrutiny/config
-      - ${CONFIG_DIR}/scrutiny/influxdb:/opt/scrutiny/influxdb
-      - ${CONFIG_DIR}/scrutiny/logs:/opt/scrutiny/log
+      - ./config/scrutiny:/opt/scrutiny/config:rw
+      - ./config/scrutiny/influxdb:/opt/scrutiny/influxdb:rw
+      - ./config/scrutiny/logs:/opt/scrutiny/log:rw
     devices:
       - /dev/sda:/dev/sda
       - /dev/sdb:/dev/sdb
