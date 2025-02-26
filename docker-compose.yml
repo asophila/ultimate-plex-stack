@@ -53,6 +53,12 @@ services:
     restart: unless-stopped
     depends_on:
       - gluetun
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:${QBIT_PORT:-8080}/api/v2/app/version"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
 
   # === Media Management ===
   prowlarr:
