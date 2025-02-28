@@ -243,28 +243,28 @@ services:
       - media_net
     restart: unless-stopped
 
-  dashy:
-    image: lissy93/dashy:latest
-    container_name: dashy
+  flame:
+    image: pawelmalak/flame:latest
+    container_name: flame
     environment:
-      - NODE_ENV=production
-      - UID=${PUID}
-      - GID=${PGID}
+      - PUID=${PUID}
+      - PGID=${PGID}
       - TZ=${TZ}
+      - PASSWORD=${FLAME_PASSWORD:-flame}
     volumes:
-      - ${BASE_PATH}/dashy/conf.yml:/app/public/conf.yml
-      - ${BASE_PATH}/dashy/item-icons:/app/public/item-icons  # For custom icons
+      - ${BASE_PATH}/flame:/app/data
+      - /var/run/docker.sock:/var/run/docker.sock
     ports:
-      - "${DASHY_PORT:-4000}:8080"
+      - "${FLAME_PORT:-5005}:5005"
     networks:
       - media_net
+    restart: unless-stopped
     healthcheck:
-      test: ['CMD', 'node', '/app/services/healthcheck']
-      interval: 1m30s
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:5005"]
+      interval: 1m
       timeout: 10s
       retries: 3
-      start_period: 40s
-    restart: unless-stopped
+      start_period: 20s
 
   filebrowser:
     image: filebrowser/filebrowser:latest
