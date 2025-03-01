@@ -89,7 +89,7 @@ services:
       - flame.type=app
       - flame.name=Prowlarr
       - flame.url=http://${HOST_IP}:${PROWLARR_PORT:-9696}
-      - flame.icon=search
+      - flame.icon=router-network-wireless
 
   sonarr:
     image: linuxserver/sonarr:latest
@@ -111,7 +111,7 @@ services:
       - flame.type=app
       - flame.name=Sonarr
       - flame.url=http://${HOST_IP}:${SONARR_PORT:-8989}
-      - flame.icon=tv
+      - flame.icon=television-classic
 
   radarr:
     image: linuxserver/radarr:latest
@@ -133,7 +133,7 @@ services:
       - flame.type=app
       - flame.name=Radarr
       - flame.url=http://${HOST_IP}:${RADARR_PORT:-7878}
-      - flame.icon=movie
+      - flame.icon=video-vintage
 
   bazarr:
     container_name: bazarr
@@ -154,7 +154,7 @@ services:
       - flame.type=app
       - flame.name=Bazarr
       - flame.url=http://${HOST_IP}:${BAZARR_PORT:-6767}
-      - flame.icon=subtitle
+      - flame.icon=subtitles-outline
 
   # === Media Servers ===
   plex:
@@ -214,7 +214,7 @@ services:
       - flame.type=app
       - flame.name=Jellyfin
       - flame.url=http://${HOST_IP}:${JELLYFIN_PORT:-8096}
-      - flame.icon=jellyfin
+      - flame.icon=jellyfish-outline
 
   # === Optional Services ===
   flaresolverr:
@@ -254,7 +254,7 @@ services:
       - flame.type=app
       - flame.name=Overseerr
       - flame.url=http://${HOST_IP}:${OVERSEERR_PORT:-5055}
-      - flame.icon=request
+      - flame.icon=list-box-outline
 
   maintainerr:
     image: ghcr.io/jorenn92/maintainerr:latest
@@ -281,7 +281,7 @@ services:
       - flame.type=app
       - flame.name=Maintainerr
       - flame.url=http://${HOST_IP}:${MAINTAINERR_PORT:-6246}
-      - flame.icon=clean
+      - flame.icon=trash-can-outline
 
   recyclarr:
     image: recyclarr/recyclarr:latest
@@ -325,7 +325,7 @@ services:
       - flame.type=app
       - flame.name=Flame
       - flame.url=http://${HOST_IP}:${FLAME_PORT:-5005}
-      - flame.icon=dashboard
+      - flame.icon=fire
 
   filebrowser:
     image: filebrowser/filebrowser:latest
@@ -438,7 +438,7 @@ services:
       - flame.type=app
       - flame.name=Tdarr
       - flame.url=http://${HOST_IP}:${TDARR_WEB_PORT:-8265}
-      - flame.icon=transcode
+      - flame.icon=transfer
 
 volumes:
   recyclarr_config:
