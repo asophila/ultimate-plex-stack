@@ -185,6 +185,26 @@ services:
       - flame.url=http://${HOST_IP}:32400/web
       - flame.icon=plex
 
+  wizarr:
+    image: ghcr.io/wizarrrr/wizarr:latest
+    container_name: wizarr
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
+    volumes:
+      - ${BASE_PATH}/wizarr:/config
+    ports:
+      - "${WIZARR_PORT:-5690}:5690"
+    networks:
+      - media_net
+    restart: unless-stopped
+    labels:
+      - flame.type=app
+      - flame.name=Wizarr
+      - flame.url=http://${HOST_IP}:${WIZARR_PORT:-5690}
+      - flame.icon=account-plus
+
   jellyfin:
     image: jellyfin/jellyfin:latest
     container_name: jellyfin
