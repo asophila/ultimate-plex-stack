@@ -18,7 +18,7 @@ services:
       - VPN_SERVICE_PROVIDER=nordvpn
       - VPN_TYPE=wireguard
       - WIREGUARD_PRIVATE_KEY=${WIREGUARD_PRIVATE_KEY}
-      - SERVER_COUNTRIES=${NORDVPN_COUNTRY}
+      - SERVER_COUNTRIES=${SERVER_COUNTRIES}
       - FIREWALL=on
       - DOT=off
       - LOG_LEVEL=info
@@ -311,7 +311,7 @@ services:
       - ${BASE_PATH}/flame:/app/data
       - /var/run/docker.sock:/var/run/docker.sock
     ports:
-      - "${FLAME_PORT:-5005}:5005"
+      - "${FLAME_PORT:-1313}:5005"
     networks:
       - media_net
     restart: unless-stopped
