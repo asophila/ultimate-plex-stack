@@ -398,46 +398,34 @@ services:
       - flame.icon=monitor
 
 # === Transcoding Services ===
-  tdarr:
-    container_name: tdarr
-    image: ghcr.io/haveagitgat/tdarr:latest
-    restart: unless-stopped
-    networks:
-      - media_net
-    ports:
-      - "${TDARR_WEB_PORT:-8265}:8265"  # webUI port
-      - "${TDARR_SERVER_PORT:-8266}:8266"  # server port
+ unmanic:
+    image: josh5/unmanic:latest
+    container_name: unmanic
     environment:
-      - TZ=${TZ}
       - PUID=${PUID}
       - PGID=${PGID}
-      - serverIP=0.0.0.0
-      - serverPort=${TDARR_SERVER_PORT:-8266}
-      - webUIPort=${TDARR_WEB_PORT:-8265}
-      - internalNode=true
-      - inContainer=true
-      - ffmpegVersion=6
-      - nodeName=kynes-internal
-      - NVIDIA_DRIVER_CAPABILITIES=all
-      - NVIDIA_VISIBLE_DEVICES=all
+      - TZ=${TZ}
     volumes:
-      - ${BASE_PATH}/tdarr/server:/app/server
-      - ${BASE_PATH}/tdarr/configs:/app/configs
-      - ${BASE_PATH}/tdarr/logs:/app/logs
-      - ${MEDIA_SHARE}:/media:cached
-      - ${BASE_PATH}/tdarr/cache:/temp
+      - ${BASE_PATH}/unmanic:/config
+      - ${MEDIA_SHARE}:/library:cached
+      - ${BASE_PATH}/unmanic/cache:/tmp/unmanic
+    ports:
+      - "${UNMANIC_PORT:-8888}:8888"
+    networks:
+      - media_net
+    restart: unless-stopped
     devices:
       - /dev/dri:/dev/dri    # For QuickSync support
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8265"]
+      test: ["CMD", "curl", "-f", "http://localhost:8888"]
       interval: 30s
       timeout: 10s
       retries: 3
       start_period: 10s
     labels:
       - flame.type=app
-      - flame.name=Tdarr
-      - flame.url=http://${HOST_IP}:${TDARR_WEB_PORT:-8265}
+      - flame.name=Unmanic
+      - flame.url=http://${HOST_IP}:${UNMANIC_PORT:-8888}
       - flame.icon=transfer
 
 volumes:
