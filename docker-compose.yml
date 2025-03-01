@@ -217,6 +217,26 @@ services:
       - flame.icon=jellyfish-outline
 
   # === Optional Services ===
+  watchtower:
+    image: containrrr/watchtower:latest
+    container_name: watchtower
+    environment:
+      - TZ=${TZ}
+      - WATCHTOWER_CLEANUP=true
+      - WATCHTOWER_SCHEDULE=0 0 4 * * *  # Run at 4 AM daily
+      - WATCHTOWER_NOTIFICATION_REPORT=true
+      - WATCHTOWER_NOTIFICATION_TEMPLATE="{{range .}}{{.Time.Format \"2006-01-02 15:04:05\"}} ({{.Level}}): {{.Message}}{{println}}{{end}}"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    networks:
+      - media_net
+    restart: unless-stopped
+    labels:
+      - flame.type=app
+      - flame.name=Watchtower
+      - flame.icon=update
+
+      
   flaresolverr:
     image: ghcr.io/flaresolverr/flaresolverr:latest
     container_name: flaresolverr
