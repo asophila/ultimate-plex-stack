@@ -37,6 +37,11 @@ services:
       timeout: 10s
       retries: 3
       start_period: 10s
+    labels:
+      - flame.type=app
+      - flame.name=Gluetun VPN
+      - flame.url=http://${HOST_IP}:${QBIT_PORT:-8080}
+      - flame.icon=vpn
 
   qbittorrent:
     image: linuxserver/qbittorrent:latest
@@ -59,6 +64,11 @@ services:
       timeout: 10s
       retries: 3
       start_period: 30s
+    labels:
+      - flame.type=app
+      - flame.name=qBittorrent
+      - flame.url=http://${HOST_IP}:${QBIT_PORT:-8080}
+      - flame.icon=download
 
   # === Media Management ===
   prowlarr:
@@ -75,6 +85,11 @@ services:
     networks:
       - media_net
     restart: unless-stopped
+    labels:
+      - flame.type=app
+      - flame.name=Prowlarr
+      - flame.url=http://${HOST_IP}:${PROWLARR_PORT:-9696}
+      - flame.icon=search
 
   sonarr:
     image: linuxserver/sonarr:latest
@@ -92,6 +107,11 @@ services:
     networks:
       - media_net
     restart: unless-stopped
+    labels:
+      - flame.type=app
+      - flame.name=Sonarr
+      - flame.url=http://${HOST_IP}:${SONARR_PORT:-8989}
+      - flame.icon=tv
 
   radarr:
     image: linuxserver/radarr:latest
@@ -109,6 +129,11 @@ services:
     networks:
       - media_net
     restart: unless-stopped
+    labels:
+      - flame.type=app
+      - flame.name=Radarr
+      - flame.url=http://${HOST_IP}:${RADARR_PORT:-7878}
+      - flame.icon=movie
 
   bazarr:
     container_name: bazarr
@@ -125,6 +150,11 @@ services:
     networks:
       - media_net
     restart: unless-stopped
+    labels:
+      - flame.type=app
+      - flame.name=Bazarr
+      - flame.url=http://${HOST_IP}:${BAZARR_PORT:-6767}
+      - flame.icon=subtitle
 
   # === Media Servers ===
   plex:
@@ -132,12 +162,11 @@ services:
     container_name: plex
     network_mode: host
     environment:
-      - PUID=1000
-      - PGID=1000
+      - PUID=${PUID}
+      - PGID=${PGID}
       - TZ=${TZ}
       - VERSION=docker
       - PLEX_CLAIM=${PLEX_CLAIM}
-      # Add these debugging options
       - NVIDIA_DRIVER_CAPABILITIES=all
       - NVIDIA_VISIBLE_DEVICES=all
       - PLEX_DEBUG=1
@@ -146,12 +175,15 @@ services:
       - ${BASE_PATH}/plex/config:/config
       - ${MEDIA_SHARE}/tv:/tv:ro,cached
       - ${MEDIA_SHARE}/movies:/movies:ro,cached
-      # Add these device mappings
-      - /dev/dri:/dev/dri
     devices:
       - /dev/dri:/dev/dri
     restart: unless-stopped
-    privileged: true  # Add this temporarily for debugging
+    privileged: true
+    labels:
+      - flame.type=app
+      - flame.name=Plex
+      - flame.url=http://${HOST_IP}:32400/web
+      - flame.icon=plex
 
   jellyfin:
     image: jellyfin/jellyfin:latest
@@ -160,7 +192,6 @@ services:
       - PUID=${PUID}
       - PGID=${PGID}
       - TZ=${TZ}
-      # Add specific Jellyfin environment variables
       - JELLYFIN_CONFIG_DIR=/config/config
       - JELLYFIN_DATA_DIR=/config
       - JELLYFIN_CACHE_DIR=/cache
@@ -179,6 +210,11 @@ services:
     networks:
       - media_net
     restart: unless-stopped
+    labels:
+      - flame.type=app
+      - flame.name=Jellyfin
+      - flame.url=http://${HOST_IP}:${JELLYFIN_PORT:-8096}
+      - flame.icon=jellyfin
 
   # === Optional Services ===
   flaresolverr:
@@ -190,10 +226,15 @@ services:
       - CAPTCHA_SOLVER=none
       - TZ=${TZ}
     ports:
-      - "8191:8191"
+      - "${FLARESOLVERR_PORT:-8191}:8191"
     networks:
       - media_net
     restart: unless-stopped
+    labels:
+      - flame.type=app
+      - flame.name=FlareSolverr
+      - flame.url=http://${HOST_IP}:${FLARESOLVERR_PORT:-8191}
+      - flame.icon=puzzle
 
   overseerr:
     image: lscr.io/linuxserver/overseerr:latest
@@ -209,6 +250,11 @@ services:
     networks:
       - media_net
     restart: unless-stopped
+    labels:
+      - flame.type=app
+      - flame.name=Overseerr
+      - flame.url=http://${HOST_IP}:${OVERSEERR_PORT:-5055}
+      - flame.icon=request
 
   maintainerr:
     image: ghcr.io/jorenn92/maintainerr:latest
@@ -231,6 +277,11 @@ services:
       timeout: 10s
       retries: 3
       start_period: 10s
+    labels:
+      - flame.type=app
+      - flame.name=Maintainerr
+      - flame.url=http://${HOST_IP}:${MAINTAINERR_PORT:-6246}
+      - flame.icon=clean
 
   recyclarr:
     image: recyclarr/recyclarr:latest
@@ -242,6 +293,11 @@ services:
     networks:
       - media_net
     restart: unless-stopped
+    labels:
+      - flame.type=app
+      - flame.name=Recyclarr
+      - flame.url=http://${HOST_IP}
+      - flame.icon=recycle
 
   flame:
     image: pawelmalak/flame:latest
@@ -265,6 +321,11 @@ services:
       timeout: 10s
       retries: 3
       start_period: 20s
+    labels:
+      - flame.type=app
+      - flame.name=Flame
+      - flame.url=http://${HOST_IP}:${FLAME_PORT:-5005}
+      - flame.icon=dashboard
 
   filebrowser:
     image: filebrowser/filebrowser:latest
@@ -291,6 +352,11 @@ services:
       interval: 1m
       timeout: 10s
       retries: 3
+    labels:
+      - flame.type=app
+      - flame.name=File Browser
+      - flame.url=http://${HOST_IP}:${FILEBROWSER_PORT:-8090}
+      - flame.icon=folder
 
   netdata:
     image: netdata/netdata:latest
@@ -301,11 +367,9 @@ services:
     environment:
       - TZ=${TZ}
       - DOCKER_HOST=unix:///var/run/docker.sock
-      # Optimize for lower resource usage
       - NETDATA_RUNTIME_MEMORY_MODE=dbengine
       - NETDATA_UPDATE_EVERY=5
       - NETDATA_HISTORY_DAYS=7
-      # Focus on media-related metrics
       - NETDATA_MONITORING_DISKS=/dev/sd*,/mnt/showtime
       - NETDATA_MONITORING_SERVICES=plex*,jellyfin*,qbittorrent*,sonarr*,radarr*
     cap_add:
@@ -326,8 +390,12 @@ services:
       - /etc/os-release:/host/etc/os-release:ro
       - /var/log:/host/var/log:ro
       - /var/run/docker.sock:/var/run/docker.sock:ro
-      # Add mergerfs monitoring
       - /mnt/showtime:/host/mnt/showtime:ro
+    labels:
+      - flame.type=app
+      - flame.name=Netdata
+      - flame.url=http://${HOST_IP}:19999
+      - flame.icon=monitor
 
 # === Transcoding Services ===
   tdarr:
@@ -350,7 +418,6 @@ services:
       - inContainer=true
       - ffmpegVersion=6
       - nodeName=kynes-internal
-      # QuickSync support
       - NVIDIA_DRIVER_CAPABILITIES=all
       - NVIDIA_VISIBLE_DEVICES=all
     volumes:
@@ -367,6 +434,11 @@ services:
       timeout: 10s
       retries: 3
       start_period: 10s
+    labels:
+      - flame.type=app
+      - flame.name=Tdarr
+      - flame.url=http://${HOST_IP}:${TDARR_WEB_PORT:-8265}
+      - flame.icon=transcode
 
 volumes:
   recyclarr_config:
