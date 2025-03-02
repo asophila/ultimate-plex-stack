@@ -192,25 +192,14 @@ services:
       - PUID=${PUID}
       - PGID=${PGID}
       - TZ=${TZ}
-      # Fix: Adding API port configuration to match the exposed port
-      - APP_URL=http://${HOST_IP}:${WIZARR_PORT:-5690}
-      - APP_PORT=${WIZARR_PORT:-5690}
-      - API_PORT=5000
     volumes:
       - ${BASE_PATH}/wizarr:/config
+      - ${BASE_PATH}/wizarr/data:/data
     ports:
-      # Fix: Adding internal port 5000 mapping to external port 5690
       - "${WIZARR_PORT:-5690}:5690"
-      - "5000:5000"
     networks:
       - media_net
     restart: unless-stopped
-    healthcheck:
-      test: ["CMD", "wget", "--spider", "-q", "http://localhost:5000/api/server"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 20s
     labels:
       - flame.type=app
       - flame.name=Wizarr
