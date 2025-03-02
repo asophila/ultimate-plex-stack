@@ -193,8 +193,7 @@ services:
       - PGID=${PGID}
       - TZ=${TZ}
     volumes:
-      - ${BASE_PATH}/wizarr:/config
-      - ${BASE_PATH}/wizarr/data:/data
+      - ${BASE_PATH}/wizarr/database:/data/database  
     ports:
       - "${WIZARR_PORT:-5690}:5690"
     networks:
