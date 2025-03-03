@@ -89,7 +89,7 @@ services:
       - flame.type=app
       - flame.name=Prowlarr
       - flame.url=http://${HOST_IP}:${PROWLARR_PORT:-9696}
-      - flame.icon=router-network-wireless
+      - flame.icon=plus-network-outline
 
   sonarr:
     image: linuxserver/sonarr:latest
@@ -300,7 +300,7 @@ services:
       - flame.type=app
       - flame.name=Overseerr
       - flame.url=http://${HOST_IP}:${OVERSEERR_PORT:-5055}
-      - flame.icon=list-box-outline
+      - flame.icon=format-list-bulleted-triangle
 
   maintainerr:
     image: ghcr.io/jorenn92/maintainerr:latest
