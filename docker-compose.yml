@@ -58,12 +58,12 @@ services:
     restart: unless-stopped
     depends_on:
       - gluetun
-  healthcheck:
-    test: ["CMD", "curl", "-f", "--retry", "3", "http://localhost:${QBIT_PORT:-8080}"]
-    interval: 30s
-    timeout: 10s
-    retries: 5
-    start_period: 60s
+    healthcheck:
+      test: ["CMD", "curl", "-f", "--retry", "3", "http://localhost:${QBIT_PORT:-8080}"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
     labels:
       - flame.type=app
       - flame.name=qBittorrent
