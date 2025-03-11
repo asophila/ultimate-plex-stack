@@ -175,6 +175,7 @@ services:
       - ${BASE_PATH}/plex/config:/config
       - ${MEDIA_SHARE}/tv:/tv:ro,cached
       - ${MEDIA_SHARE}/movies:/movies:ro,cached
+      - ${MEDIA_SHARE}/system:/system:ro,cached
     devices:
       - /dev/dri:/dev/dri
     restart: unless-stopped
