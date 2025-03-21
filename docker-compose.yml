@@ -31,6 +31,8 @@ services:
     networks:
       - media_net
     restart: unless-stopped
+    mem_limit: 256M
+    memswap_limit: 512M
     healthcheck:
       test: ["CMD", "wget", "-qO-", "--dns-timeout=2", "--connect-timeout=2", "https://1.1.1.1/cdn-cgi/trace"]
       interval: 30s
@@ -56,6 +58,8 @@ services:
       - ${BASE_PATH}/qbittorrent:/config
       - ${DOWNLOAD_DIR}:/downloads:cached
     restart: unless-stopped
+    mem_limit: 1024M
+    memswap_limit: 1536M
     depends_on:
       - gluetun
     healthcheck:
