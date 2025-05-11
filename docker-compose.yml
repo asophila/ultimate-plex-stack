@@ -414,6 +414,8 @@ services:
     container_name: glances
     pid: host
     network_mode: host
+    security_opt:
+      - apparmor:unconfined
     restart: unless-stopped
     environment:
       - TZ=${TZ}
