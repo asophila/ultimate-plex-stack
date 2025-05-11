@@ -409,81 +409,61 @@ services:
       - flame.url=http://${HOST_IP}:${FILEBROWSER_PORT:-8090}
       - flame.icon=folder
 
-  netdata:
-    image: netdata/netdata:latest
-    container_name: netdata
+  glances:
+    image: nicolargo/glances:latest
+    container_name: glances
     pid: host
     network_mode: host
     restart: unless-stopped
     environment:
       - TZ=${TZ}
-      - DOCKER_HOST=unix:///var/run/docker.sock
-      - NETDATA_RUNTIME_MEMORY_MODE=dbengine
-      - NETDATA_UPDATE_EVERY=5
-      - NETDATA_HISTORY_DAYS=7
-      - NETDATA_MONITORING_DISKS=/dev/sd*,/mnt/showtime
-      - NETDATA_MONITORING_SERVICES=plex*,jellyfin*,qbittorrent*,sonarr*,radarr*
-    cap_add:
-      - SYS_PTRACE
-      - SYS_ADMIN
-    security_opt:
-      - apparmor:unconfined
+      - GLANCES_OPT=-w
     volumes:
-      - netdataconfig:/etc/netdata
-      - netdatalib:/var/lib/netdata
-      - netdatacache:/var/cache/netdata
-      - /:/host/root:ro,rslave
-      - /etc/passwd:/host/etc/passwd:ro
-      - /etc/group:/host/etc/group:ro
-      - /etc/localtime:/etc/localtime:ro
-      - /proc:/host/proc:ro
-      - /sys:/host/sys:ro
-      - /etc/os-release:/host/etc/os-release:ro
-      - /var/log:/host/var/log:ro
       - /var/run/docker.sock:/var/run/docker.sock:ro
-      - /mnt/showtime:/host/mnt/showtime:ro
+      - /:/rootfs:ro
+      - /var/run:/var/run:ro
+      - /sys:/sys:ro
+      - /etc:/etc:ro
+      - /proc:/proc:ro
     labels:
       - flame.type=app
-      - flame.name=Netdata
-      - flame.url=http://${HOST_IP}:19999
+      - flame.name=Glances
+      - flame.url=http://${HOST_IP}:61208
       - flame.icon=monitor
 
 # === Transcoding Services ===
-  unmanic:
-    image: josh5/unmanic:latest
-    container_name: unmanic
+  fileflows:
+    image: revenz/fileflows:latest
+    container_name: fileflows
     environment:
       - PUID=${PUID}
       - PGID=${PGID}
       - TZ=${TZ}
     volumes:
-      - ${BASE_PATH}/unmanic:/config
+      - ${BASE_PATH}/fileflows:/app/data
       - ${MEDIA_SHARE}:/library:cached
-      - ${BASE_PATH}/unmanic/cache:/tmp/unmanic
+      - ${DOWNLOAD_DIR}:/downloads:cached
     ports:
-      - "${UNMANIC_PORT:-8888}:8888"
+      - "${FILEFLOWS_PORT:-5000}:5000"
     networks:
       - media_net
     restart: unless-stopped
     devices:
       - /dev/dri:/dev/dri    # For QuickSync support
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8888"]
+      test: ["CMD", "curl", "-f", "http://localhost:5000"]
       interval: 30s
       timeout: 10s
       retries: 3
       start_period: 10s
     labels:
       - flame.type=app
-      - flame.name=Unmanic
-      - flame.url=http://${HOST_IP}:${UNMANIC_PORT:-8888}
+      - flame.name=FileFlows
+      - flame.url=http://${HOST_IP}:${FILEFLOWS_PORT:-5000}
       - flame.icon=transfer
 
 volumes:
   recyclarr_config:
-  netdataconfig:
-  netdatalib:
-  netdatacache:
 
 networks:
   media_net:
