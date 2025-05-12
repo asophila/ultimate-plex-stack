@@ -411,18 +411,21 @@ services:
 
 # === Transcoding Services ===
   fileflows:
-    image: revenz/fileflows:latest
+    image: revenz/fileflows
     container_name: fileflows
     environment:
       - PUID=${PUID}
       - PGID=${PGID}
       - TZ=${TZ}
+      - TempPathHost=/tmp/fileflows
     volumes:
-      - ${BASE_PATH}/fileflows:/app/data
+      - ${BASE_PATH}/fileflows:/app/Data
+      - /tmp/fileflows:/temp
+      - ${BASE_PATH}/fileflows/logs:/app/Logs
+      - /var/run/docker.sock:/var/run/docker.sock:ro
       - ${MEDIA_SHARE}:/library:cached
-      - ${DOWNLOAD_DIR}:/downloads:cached
     ports:
-      - "${FILEFLOWS_PORT:-5000}:5000"
+      - "${FILEFLOWS_PORT:-19200}:5000"
     networks:
       - media_net
     restart: unless-stopped
@@ -437,7 +440,7 @@ services:
     labels:
       - flame.type=app
       - flame.name=FileFlows
-      - flame.url=http://${HOST_IP}:${FILEFLOWS_PORT:-5000}
+      - flame.url=http://${HOST_IP}:${FILEFLOWS_PORT:-19200}
       - flame.icon=transfer
 
 volumes:
