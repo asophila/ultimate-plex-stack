@@ -420,7 +420,7 @@ services:
       - TempPathHost=/tmp/fileflows
     volumes:
       - ${BASE_PATH}/fileflows:/app/Data
-      - /tmp/fileflows:/temp
+      - /tmp:/temp
       - ${BASE_PATH}/fileflows/logs:/app/Logs
       - /var/run/docker.sock:/var/run/docker.sock:ro
       - ${MEDIA_SHARE}:/library:cached
