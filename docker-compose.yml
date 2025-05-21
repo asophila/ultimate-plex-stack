@@ -210,6 +210,27 @@ services:
       - flame.url=http://${HOST_IP}:${WIZARR_PORT:-5690}
       - flame.icon=account-plus
 
+
+  tautulli:
+    image: ghcr.io/tautulli/tautulli:latest
+    container_name: tautulli
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
+    volumes:
+      - ${BASE_PATH}/tautulli:/config
+    ports:
+      - "${TAUTULLI_PORT:-8181}:8181"
+    networks:
+      - media_net
+    restart: unless-stopped
+    labels:
+      - flame.type=app
+      - flame.name=Tautulli
+      - flame.url=http://${HOST_IP}:${TAUTULLI_PORT:-8181}
+      - flame.icon=chart-line
+      
   jellyfin:
     image: jellyfin/jellyfin:latest
     container_name: jellyfin
