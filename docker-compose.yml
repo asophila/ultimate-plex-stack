@@ -434,7 +434,6 @@ services:
   fileflows:
     image: revenz/fileflows
     container_name: fileflows
-    user: "${PUID}:${PGID}"  # Add this line
     environment:
       - PUID=${PUID}
       - PGID=${PGID}
