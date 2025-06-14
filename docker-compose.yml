@@ -46,7 +46,7 @@ services:
       - flame.url=http://${HOST_IP}:${QBIT_PORT:-8080}
       - flame.icon=vpn
 
-  transmission:
+transmission:
     image: linuxserver/transmission:latest
     container_name: transmission
     network_mode: "service:gluetun"
@@ -58,7 +58,7 @@ services:
       - PASS=${TRANSMISSION_PASS:-password}
     volumes:
       - ${BASE_PATH}/transmission:/config
-      - ${DOWNLOAD_DIR}:/downloads:cached
+      - ${DOWNLOAD_DIR}:/downloads
       - ${DOWNLOAD_DIR}/transmission-watch:/watch
     restart: unless-stopped
     mem_limit: 512M
