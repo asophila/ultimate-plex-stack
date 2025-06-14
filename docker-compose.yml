@@ -76,7 +76,7 @@ transmission:
       - flame.name=Transmission
       - flame.url=http://${HOST_IP}:${TRANSMISSION_PORT:-9091}
       - flame.icon=download-outline
-      
+  
   qbittorrent:
     image: linuxserver/qbittorrent:latest
     container_name: qbittorrent
