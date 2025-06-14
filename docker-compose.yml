@@ -11,6 +11,7 @@ services:
       - /dev/net/tun:/dev/net/tun
     ports:
       - "${QBIT_PORT:-8080}:8080"
+      - "${TRANSMISSION_PORT:-9091}:9091"
     environment:
       - PUID=${PUID}
       - PGID=${PGID}
@@ -45,6 +46,37 @@ services:
       - flame.url=http://${HOST_IP}:${QBIT_PORT:-8080}
       - flame.icon=vpn
 
+  transmission:
+    image: linuxserver/transmission:latest
+    container_name: transmission
+    network_mode: "service:gluetun"
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
+      - USER=${TRANSMISSION_USER:-admin}
+      - PASS=${TRANSMISSION_PASS:-password}
+    volumes:
+      - ${BASE_PATH}/transmission:/config
+      - ${DOWNLOAD_DIR}:/downloads:cached
+      - ${DOWNLOAD_DIR}/transmission-watch:/watch
+    restart: unless-stopped
+    mem_limit: 512M
+    memswap_limit: 768M
+    depends_on:
+      - gluetun
+    healthcheck:
+      test: ["CMD", "curl", "-f", "--retry", "3", "http://localhost:9091"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+    labels:
+      - flame.type=app
+      - flame.name=Transmission
+      - flame.url=http://${HOST_IP}:${TRANSMISSION_PORT:-9091}
+      - flame.icon=download-outline
+      
   qbittorrent:
     image: linuxserver/qbittorrent:latest
     container_name: qbittorrent
