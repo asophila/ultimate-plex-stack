@@ -46,7 +46,7 @@ services:
       - flame.url=http://${HOST_IP}:${QBIT_PORT:-8080}
       - flame.icon=vpn
 
-transmission:
+  transmission:
     image: linuxserver/transmission:latest
     container_name: transmission
     network_mode: "service:gluetun"
@@ -360,7 +360,7 @@ transmission:
       - flame.url=http://${HOST_IP}:${OVERSEERR_PORT:-5055}
       - flame.icon=format-list-bulleted-triangle
 
-jellyseerr:
+  jellyseerr:
     image: fallenbagel/jellyseerr:latest
     container_name: jellyseerr
     environment:
