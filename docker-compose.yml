@@ -360,6 +360,26 @@ transmission:
       - flame.url=http://${HOST_IP}:${OVERSEERR_PORT:-5055}
       - flame.icon=format-list-bulleted-triangle
 
+jellyseerr:
+    image: fallenbagel/jellyseerr:latest
+    container_name: jellyseerr
+    environment:
+      - LOG_LEVEL=debug
+      - TZ=${TZ}
+    volumes:
+      - ${BASE_PATH}/jellyseerr:/app/config
+    ports:
+      - "${JELLYSEERR_PORT:-5056}:5055"
+    networks:
+      - media_net
+    restart: unless-stopped
+    labels:
+      - flame.type=app
+      - flame.name=Jellyseerr
+      - flame.url=http://${HOST_IP}:${JELLYSEERR_PORT:-5056}
+      - flame.icon=jellyfish
+
+
   maintainerr:
     image: ghcr.io/jorenn92/maintainerr:latest
     container_name: maintainerr
