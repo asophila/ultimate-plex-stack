@@ -56,6 +56,9 @@ services:
       - TZ=${TZ}
       - USER=${TRANSMISSION_USER:-admin}
       - PASS=${TRANSMISSION_PASS:-password}
+      - TRANSMISSION_DOWNLOAD_DIR=/downloads
+      - TRANSMISSION_INCOMPLETE_DIR=/downloads/incomplete
+      - TRANSMISSION_WATCH_DIR=/watch
     volumes:
       - ${BASE_PATH}/transmission:/config
       - ${DOWNLOAD_DIR}:/downloads
