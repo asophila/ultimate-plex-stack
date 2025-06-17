@@ -47,7 +47,7 @@ services:
       - flame.icon=vpn
 
   deluge:
-    image: deluge/deluge:latest
+    image: binhex/arch-deluge:latest
     container_name: deluge
     network_mode: "service:gluetun"
     environment:
