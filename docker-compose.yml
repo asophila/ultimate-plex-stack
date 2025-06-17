@@ -34,11 +34,11 @@ services:
     mem_limit: 256M
     memswap_limit: 512M
     healthcheck:
-      test: ["CMD", "wget", "-qO-", "--dns-timeout=2", "--connect-timeout=2", "https://1.1.1.1/cdn-cgi/trace"]
+      test: ["CMD", "curl", "-f", "--silent", "--show-error", "--retry", "3", "http://localhost:${QBIT_PORT:-8080}"]
       interval: 30s
       timeout: 10s
       retries: 3
-      start_period: 10s
+      start_period: 60s
     labels:
       - flame.type=app
       - flame.name=Gluetun VPN
@@ -89,6 +89,12 @@ services:
     networks:
       - media_net
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "--silent", "--show-error", "http://localhost:9696/prowlarr/ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
     labels:
       - flame.type=app
       - flame.name=Prowlarr
@@ -111,6 +117,12 @@ services:
     networks:
       - media_net
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "--silent", "--show-error", "http://localhost:8989/sonarr/ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
     labels:
       - flame.type=app
       - flame.name=Sonarr
@@ -133,6 +145,12 @@ services:
     networks:
       - media_net
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "--silent", "--show-error", "http://localhost:7878/radarr/ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
     labels:
       - flame.type=app
       - flame.name=Radarr
@@ -154,6 +172,12 @@ services:
     networks:
       - media_net
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "--silent", "--show-error", "http://localhost:6767/bazarr/ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
     labels:
       - flame.type=app
       - flame.name=Bazarr
@@ -210,6 +234,12 @@ services:
     networks:
       - media_net
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "--silent", "--show-error", "http://localhost:5690/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
     labels:
       - flame.type=app
       - flame.name=Wizarr
@@ -231,6 +261,12 @@ services:
     networks:
       - media_net
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "--silent", "--show-error", "http://localhost:8181/status"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
     labels:
       - flame.type=app
       - flame.name=Tautulli
@@ -262,6 +298,12 @@ services:
     networks:
       - media_net
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "--silent", "--show-error", "http://localhost:8096/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
     labels:
       - flame.type=app
       - flame.name=Jellyfin
@@ -308,6 +350,12 @@ services:
     networks:
       - media_net
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "--silent", "--show-error", "http://localhost:8191/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
     labels:
       - flame.type=app
       - flame.name=FlareSolverr
@@ -328,6 +376,12 @@ services:
     networks:
       - media_net
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "--silent", "--show-error", "http://localhost:5055/api/v1/status"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
     labels:
       - flame.type=app
       - flame.name=Overseerr
@@ -347,6 +401,12 @@ services:
     networks:
       - media_net
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "--silent", "--show-error", "http://localhost:5055/api/v1/status"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
     labels:
       - flame.type=app
       - flame.name=Jellyseerr
