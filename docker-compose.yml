@@ -220,13 +220,17 @@ services:
       - flame.url=http://${HOST_IP}:32400/web
       - flame.icon=plex
 
-  wizarr:
+wizarr:
     image: ghcr.io/wizarrrr/wizarr:latest
     container_name: wizarr
     environment:
       - PUID=${PUID}
       - PGID=${PGID}
       - TZ=${TZ}
+      # Add these to handle the migration issue
+      - FLASK_ENV=production
+      - WIZARR_SKIP_MIGRATION=${WIZARR_SKIP_MIGRATION:-false}
+      - PYTHONPATH=/data
     volumes:
       - ${BASE_PATH}/wizarr/database:/data/database  
     ports:
@@ -234,6 +238,17 @@ services:
     networks:
       - media_net
     restart: unless-stopped
+    # Updated command to handle the problematic migration
+    command: >
+      sh -c "
+        # Check if the problematic migration file exists and remove it
+        if [ -f /data/migrations/versions/20250729_squashed_connections_expiry_system.py ]; then
+          echo 'Removing problematic migration file to prevent SQL errors...'
+          rm -f /data/migrations/versions/20250729_squashed_connections_expiry_system.py
+        fi &&
+        # Initialize the app normally
+        python /data/app.py
+      "
     healthcheck:
       test: ["CMD", "curl", "-f", "--silent", "--show-error", "http://localhost:5690/health"]
       interval: 30s
