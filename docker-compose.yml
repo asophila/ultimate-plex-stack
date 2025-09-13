@@ -471,7 +471,7 @@ services:
 
 # === Transcoding Services ===
   fileflows:
-    image: revenz/fileflows:25.06
+    image: revenz/fileflows:stable
     container_name: fileflows
     environment:
       - PUID=${PUID}
