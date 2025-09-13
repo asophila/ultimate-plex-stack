@@ -55,9 +55,8 @@ services:
       - TZ=${TZ}
       - WEBUI_PORT=${QBIT_PORT:-8080}
     volumes:
-      - ${BASE_PATH}/qbittorrent:/config                    # ZFS mirror for config
-      - ${DOWNLOAD_DIR}:/downloads:cached                   # MergerFS for completed downloads
-      - ${TORRENT_STAGING}:/staging:cached
+      - ${BASE_PATH}/qbittorrent:/config
+      - ${DOWNLOAD_DIR}:/downloads:cached
     restart: unless-stopped
     mem_limit: 1024M
     memswap_limit: 1536M
@@ -190,7 +189,6 @@ services:
     image: linuxserver/plex:latest
     container_name: plex
     network_mode: host
-    runtime: nvidia
     environment:
       - PUID=${PUID}
       - PGID=${PGID}
@@ -201,13 +199,11 @@ services:
       - NVIDIA_VISIBLE_DEVICES=all
       - PLEX_DEBUG=1
       - PLEX_MEDIA_SERVER_USE_SYSLOG=true
-      - TMPDIR=${TRANSCODING_TEMP}/temp
     volumes:
-      - ${BASE_PATH}/plex/config:/config                    # ZFS mirror for config/database
-      - ${TRANSCODING_TEMP}:/transcode:cached               # NVMe for transcoding
-      - ${MEDIA_SHARE}/tv:/tv:ro,cached                     # MergerFS for media (read-only)
-      - ${MEDIA_SHARE}/movies:/movies:ro,cached             # MergerFS for media (read-only)
-      - ${MEDIA_SHARE}/system:/system:ro,cached  
+      - ${BASE_PATH}/plex/config:/config
+      - ${MEDIA_SHARE}/tv:/tv:ro,cached
+      - ${MEDIA_SHARE}/movies:/movies:ro,cached
+      - ${MEDIA_SHARE}/system:/system:ro,cached
     devices:
       - /dev/dri:/dev/dri
     restart: unless-stopped
@@ -289,11 +285,11 @@ services:
       - JELLYFIN_CACHE_DIR=/cache
       - JELLYFIN_LOG_DIR=/config/log
     volumes:
-      - ${BASE_PATH}/jellyfin/config:/config                # ZFS mirror for config/database
-      - ${TRANSCODING_TEMP}/cache:/cache                    # NVMe for transcoding cache
-      - ${MEDIA_SHARE}/tv:/tv:ro,cached                     # MergerFS for media (read-only)
-      - ${MEDIA_SHARE}/movies:/movies:ro,cached             # MergerFS for media (read-only)
-      - ${MEDIA_SHARE}/music:/music:ro,cached               # MergerFS for media (read-only)
+      - ${BASE_PATH}/jellyfin/config:/config
+      - ${BASE_PATH}/jellyfin/cache:/cache
+      - ${MEDIA_SHARE}/tv:/tv:ro,cached
+      - ${MEDIA_SHARE}/movies:/movies:ro,cached
+      - ${MEDIA_SHARE}/music:/music:ro,cached
       - ${MEDIA_SHARE}/system:/system:ro,cached
     ports:
       - "${JELLYFIN_PORT:-8096}:8096"
@@ -473,7 +469,6 @@ services:
       - flame.url=http://${HOST_IP}:${FLAME_PORT:-5005}
       - flame.icon=fire
 
-
 # === Transcoding Services ===
   fileflows:
     image: revenz/fileflows:25.06
@@ -482,13 +477,13 @@ services:
       - PUID=${PUID}
       - PGID=${PGID}
       - TZ=${TZ}
-      - TempPathHost=${TRANSCODING_TEMP}/temp
+      - TempPathHost=/tmp/fileflows
     volumes:
-      - ${BASE_PATH}/fileflows:/app/Data                    # ZFS mirror for config
-      - ${TRANSCODING_TEMP}:/temp                           # NVMe for high-speed temp files
-      - ${BASE_PATH}/fileflows/logs:/app/Logs               # ZFS mirror for logs
+      - ${BASE_PATH}/fileflows:/app/Data
+      - /tmp:/temp
+      - ${BASE_PATH}/fileflows/logs:/app/Logs
       - /var/run/docker.sock:/var/run/docker.sock:ro
-      - ${MEDIA_SHARE}:/library:cached  
+      - ${MEDIA_SHARE}:/library:cached
     ports:
       - "${FILEFLOWS_PORT:-19200}:5000"
     networks:
