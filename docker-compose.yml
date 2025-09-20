@@ -63,11 +63,11 @@ services:
     depends_on:
       - gluetun
     healthcheck:
-      test: ["CMD", "curl", "-f", "--retry", "3", "http://localhost:${QBIT_PORT:-8080}"]
+      test: ["CMD", "curl", "--fail", "--silent", "--show-error", "--retry", "3", "--max-time", "10", "http://localhost:8080"] || exit 1
       interval: 30s
       timeout: 10s
-      retries: 5
-      start_period: 60s
+      retries: 3
+      start_period: 45s
     labels:
       - flame.type=app
       - flame.name=qBittorrent
@@ -90,7 +90,7 @@ services:
       - media_net
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "curl", "-f", "--silent", "--show-error", "http://localhost:9696/prowlarr/ping"]
+      test: ["CMD", "curl", "--fail", "--silent", "--show-error", "http://localhost:9696/prowlarr/ping"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -118,7 +118,7 @@ services:
       - media_net
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "curl", "-f", "--silent", "--show-error", "http://localhost:8989/sonarr/ping"]
+      test: ["CMD", "curl", "--fail", "--silent", "--show-error", "http://localhost:8989/sonarr/ping"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -146,7 +146,7 @@ services:
       - media_net
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "curl", "-f", "--silent", "--show-error", "http://localhost:7878/radarr/ping"]
+      test: ["CMD", "curl", "--fail", "--silent", "--show-error", "http://localhost:7878/radarr/ping"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -489,6 +489,32 @@ services:
       - flame.name=Flame
       - flame.url=http://${HOST_IP}:${FLAME_PORT:-5005}
       - flame.icon=fire
+
+  homepage:
+    image: ghcr.io/gethomepage/homepage:latest
+    container_name: homepage
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+    ports:
+      - "3000:3000"
+    volumes:
+      - ${BASE_PATH}/homepage:/app/config
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    restart: unless-stopped
+    networks:
+      - media_net
+
+  autoheal:
+    image: willfarrell/autoheal:latest
+    container_name: autoheal
+    restart: always
+    environment:
+      - AUTOHEAL_CONTAINER_LABEL=all
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    networks:
+      - media_net
 
 # === Transcoding Services ===
   fileflows:
