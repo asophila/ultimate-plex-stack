@@ -208,6 +208,11 @@ services:
     devices:
       - /dev/dri:/dev/dri
     restart: unless-stopped
+    logging:                                        # NEW: Limit logging
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "2"
     healthcheck:
       test: ["CMD", "curl", "-f", "--silent", "--show-error", "http://localhost:32400/identity"]
       interval: 30s
@@ -287,18 +292,23 @@ services:
       - JELLYFIN_LOG_DIR=/config/log
     volumes:
       - ${BASE_PATH}/jellyfin/config:/config
-      - ${BASE_PATH}/jellyfin/cache:/cache
+      - ${FAST_MOUNT}/jellyfin/cache:/cache         # CHANGED: Cache on NVMe
       - ${MEDIA_SHARE}/tv:/tv:ro,cached
       - ${MEDIA_SHARE}/movies:/movies:ro,cached
       - ${MEDIA_SHARE}/music:/music:ro,cached
       - ${MEDIA_SHARE}/system:/system:ro,cached
     ports:
       - "${JELLYFIN_PORT:-8096}:8096"
-      - "7359:7359/udp"  # Local network discovery
-      - "1900:1900/udp"  # DLNA
+      - "7359:7359/udp"
+      - "1900:1900/udp"
     networks:
       - media_net
     restart: unless-stopped
+    logging:                                        # NEW: Limit logging
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "2"
     healthcheck:
       test: ["CMD", "curl", "-f", "--silent", "--show-error", "http://localhost:8096/health"]
       interval: 30s
@@ -430,6 +440,16 @@ services:
     networks:
       - media_net
     restart: unless-stopped
+    deploy:                                         # NEW: Resource limits
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 512M
+    logging:                                        # NEW: Limit logging
+      driver: "json-file"
+      options:
+        max-size: "5m"
+        max-file: "2"
     healthcheck:
       test: ["CMD", "wget", "-qO-", "http://localhost:${MAINTAINERR_PORT:-6246}/health"]
       interval: 30s
@@ -478,11 +498,11 @@ services:
       - PUID=${PUID}
       - PGID=${PGID}
       - TZ=${TZ}
-      - TempPathHost=/tmp/fileflows
+      - TempPathHost=${FAST_MOUNT}/fileflows/temp   # CHANGED: Use NVMe for temp files
     volumes:
       - ${BASE_PATH}/fileflows:/app/Data
-      - /tmp:/temp
-      - ${BASE_PATH}/fileflows/logs:/app/Logs
+      - ${FAST_MOUNT}/fileflows/temp:/temp          # CHANGED: NVMe temp processing
+      - ${FAST_MOUNT}/fileflows/logs:/app/Logs      # CHANGED: NVMe logs
       - /var/run/docker.sock:/var/run/docker.sock:ro
       - ${MEDIA_SHARE}:/library:cached
     ports:
@@ -491,7 +511,12 @@ services:
       - media_net
     restart: unless-stopped
     devices:
-      - /dev/dri:/dev/dri    # For QuickSync support
+      - /dev/dri:/dev/dri
+    logging:                                        # NEW: Limit logging
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "2"
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:5000"]
       interval: 30s
