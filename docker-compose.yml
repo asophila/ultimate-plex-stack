@@ -200,7 +200,8 @@ services:
       - PLEX_DEBUG=1
       - PLEX_MEDIA_SERVER_USE_SYSLOG=true
     volumes:
-      - ${BASE_PATH}/plex/config:/config
+      - ${FAST_MOUNT}/plex/config:/config           
+      - ${FAST_MOUNT}/plex/transcode:/transcode
       - ${MEDIA_SHARE}/tv:/tv:ro,cached
       - ${MEDIA_SHARE}/movies:/movies:ro,cached
       - ${MEDIA_SHARE}/system:/system:ro,cached
