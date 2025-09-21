@@ -553,8 +553,8 @@ services:
     image: ghcr.io/gethomepage/homepage:latest
     container_name: homepage
     environment:
-      - PUID=${PUID}
-      - PGID=${PGID}
+      - PUID=1000          # Keep same user ID
+      - PGID=999           # Use docker group ID specifically for Homepage
       - HOMEPAGE_ALLOWED_HOSTS=*
     ports:
       - "3000:3000"
