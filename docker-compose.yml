@@ -44,6 +44,11 @@ services:
       - flame.name=Gluetun VPN
       - flame.url=http://${HOST_IP}:${QBIT_PORT:-8080}
       - flame.icon=vpn
+      - homepage.group=VPN & Downloads
+      - homepage.name=Gluetun VPN
+      - homepage.icon=vpn
+      - homepage.hrefhttp://${HOST_IP}:${QBIT_PORT:-8080}
+      - homepage.description=NordVPN WireGuard container
  
   qbittorrent:
     image: linuxserver/qbittorrent:latest
@@ -73,6 +78,15 @@ services:
       - flame.name=qBittorrent
       - flame.url=http://${HOST_IP}:${QBIT_PORT:-8080}
       - flame.icon=download
+      - homepage.group=VPN & Downloads
+      - homepage.name=qBittorrent
+      - homepage.icon=qbittorrent
+      - homepage.href=http://${HOST_IP}:${QBIT_PORT:-8080}
+      - homepage.description=Torrent client via VPN
+      - homepage.widget.type=qbittorrent
+      - homepage.widget.url=http://${HOST_IP}:${QBIT_PORT:-8080}
+      - homepage.widget.username=admin
+      - homepage.widget.password=2MFr7cenlibr0
 
   # === Media Management ===
   prowlarr:
@@ -100,6 +114,14 @@ services:
       - flame.name=Prowlarr
       - flame.url=http://${HOST_IP}:${PROWLARR_PORT:-9696}
       - flame.icon=plus-network-outline
+      - homepage.group=Media Management
+      - homepage.name=Prowlarr
+      - homepage.icon=prowlarr
+      - homepage.href=http://${HOST_IP}:${PROWLARR_PORT:-9696}
+      - homepage.description=Indexer manager
+      - homepage.widget.type=prowlarr
+      - homepage.widget.url=http://prowlarr:9696
+      - homepage.widget.key=${PROWLARR_KEY}
 
   sonarr:
     image: linuxserver/sonarr:latest
@@ -128,6 +150,14 @@ services:
       - flame.name=Sonarr
       - flame.url=http://${HOST_IP}:${SONARR_PORT:-8989}
       - flame.icon=television-classic
+      - homepage.group=Media Management
+      - homepage.name=Sonarr
+      - homepage.icon=sonarr
+      - homepage.href=http://${HOST_IP}:${SONARR_PORT:-8989}
+      - homepage.description=TV show management
+      - homepage.widget.type=sonarr
+      - homepage.widget.url=http://sonarr:8989
+      - homepage.widget.key=${SONARR_KEY}
 
   radarr:
     image: linuxserver/radarr:latest
@@ -156,6 +186,14 @@ services:
       - flame.name=Radarr
       - flame.url=http://${HOST_IP}:${RADARR_PORT:-7878}
       - flame.icon=video-vintage
+      - homepage.group=Media Management
+      - homepage.name=Radarr
+      - homepage.icon=radarr
+      - homepage.href=http://${HOST_IP}:${RADARR_PORT:-7878}
+      - homepage.description=Movie management
+      - homepage.widget.type=radarr
+      - homepage.widget.url=http://radarr:7878
+      - homepage.widget.key=${RADARR_KEY}
 
   bazarr:
     container_name: bazarr
@@ -183,6 +221,14 @@ services:
       - flame.name=Bazarr
       - flame.url=http://${HOST_IP}:${BAZARR_PORT:-6767}
       - flame.icon=subtitles-outline
+      - homepage.group=Media Management
+      - homepage.name=Bazarr
+      - homepage.icon=bazarr
+      - homepage.href=http://${HOST_IP}:${BAZARR_PORT:-6767}
+      - homepage.description=Subtitle management
+      - homepage.widget.type=bazarr
+      - homepage.widget.url=http://bazarr:6767
+      - homepage.widget.key=${BAZARR_KEY}
 
   # === Media Servers ===
   plex:
@@ -225,6 +271,14 @@ services:
       - flame.name=Plex
       - flame.url=http://${HOST_IP}:32400/web
       - flame.icon=plex
+      - homepage.group=Media Servers
+      - homepage.name=Plex Media Server
+      - homepage.icon=plex
+      - homepage.href=http://${HOST_IP}:32400/web
+      - homepage.description=Media streaming server
+      - homepage.widget.type=plex
+      - homepage.widget.url=http://${HOST_IP}:32400
+      - homepage.widget.key=${PLEX_TOKEN}
 
   wizarr:
     image: ghcr.io/wizarrrr/wizarr:latest
@@ -251,6 +305,11 @@ services:
       - flame.name=Wizarr
       - flame.url=http://${HOST_IP}:${WIZARR_PORT:-5690}
       - flame.icon=account-plus
+      - homepage.group=Request Management
+      - homepage.name=Wizarr
+      - homepage.icon=wizarr
+      - homepage.href=http://${HOST_IP}:${WIZARR_PORT:-5690}
+      - homepage.description=User invitation system
 
 
   tautulli:
@@ -278,6 +337,14 @@ services:
       - flame.name=Tautulli
       - flame.url=http://${HOST_IP}:${TAUTULLI_PORT:-8181}
       - flame.icon=chart-line
+      - homepage.group=Statistics & Monitoring
+      - homepage.name=Tautulli
+      - homepage.icon=tautulli
+      - homepage.href=http://${HOST_IP}:${TAUTULLI_PORT:-8181}
+      - homepage.description=Plex analytics
+      - homepage.widget.type=tautulli
+      - homepage.widget.url=http://tautulli:8181
+      - homepage.widget.key=YOUR_TAUTULLI_API_KEY
       
   jellyfin:
     image: jellyfin/jellyfin:latest
@@ -398,6 +465,14 @@ services:
       - flame.name=Overseerr
       - flame.url=http://${HOST_IP}:${OVERSEERR_PORT:-5055}
       - flame.icon=format-list-bulleted-triangle
+      - homepage.group=Request Management
+      - homepage.name=Overseerr
+      - homepage.icon=overseerr
+      - homepage.href=http://${HOST_IP}:${OVERSEERR_PORT:-5055}
+      - homepage.description=Media request management
+      - homepage.widget.type=overseerr
+      - homepage.widget.url=http://overseerr:5055
+      - homepage.widget.key=${OVERSEER_KEY}
 
   maintainerr:
     image: ghcr.io/jorenn92/maintainerr:latest
@@ -435,6 +510,11 @@ services:
       - flame.name=Maintainerr
       - flame.url=http://${HOST_IP}:${MAINTAINERR_PORT:-6246}
       - flame.icon=trash-can-outline
+      - homepage.group=Maintenance & Tools
+      - homepage.name=Maintainerr
+      - homepage.icon=maintainerr
+      - homepage.href=http://192.168.31.101:6246
+      - homepage.description=Media library maintenance
 
   flame:
     image: pawelmalak/flame:latest
@@ -463,6 +543,11 @@ services:
       - flame.name=Flame
       - flame.url=http://${HOST_IP}:${FLAME_PORT:-5005}
       - flame.icon=fire
+      - homepage.group=Dashboards
+      - homepage.name=Flame (Legacy)
+      - homepage.icon=flame
+      - homepage.href=http://192.168.31.101:1313
+      - homepage.description=Previous dashboard
 
   homepage:
     image: ghcr.io/gethomepage/homepage:latest
@@ -529,6 +614,11 @@ services:
       - flame.name=FileFlows
       - flame.url=http://${HOST_IP}:${FILEFLOWS_PORT:-19200}
       - flame.icon=transfer
+      - homepage.group=Maintenance & Tools
+      - homepage.name=FileFlows
+      - homepage.icon=fileflows
+      - homepage.href=http://192.168.31.101:19200
+      - homepage.description=File processing automation
 
 networks:
   media_net:
