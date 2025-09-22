@@ -345,7 +345,7 @@ services:
       - homepage.description=Plex analytics
       - homepage.widget.type=tautulli
       - homepage.widget.url=http://tautulli:8181
-      - homepage.widget.key=YOUR_TAUTULLI_API_KEY
+      - homepage.widget.key=${TAUTULLI_KEY}
       
   jellyfin:
     image: jellyfin/jellyfin:latest
