@@ -63,6 +63,7 @@ services:
     volumes:
       - ${BASE_PATH}/qbittorrent:/config
       - ${DOWNLOAD_DIR}:/downloads:cached
+      - ${INCOMPLETE_DOWNLOAD_DIR}:/incomplete:cached
     restart: unless-stopped
     mem_limit: 1024M
     memswap_limit: 1536M
