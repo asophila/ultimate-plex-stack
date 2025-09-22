@@ -250,8 +250,8 @@ services:
     volumes:
       - ${FAST_MOUNT}/plex/config:/config           
       - ${FAST_MOUNT}/plex/transcode:/transcode
-      - ${MEDIA_SHARE}/tv:/tv:ro,cached
-      - ${MEDIA_SHARE}/movies:/movies:ro,cached
+      - ${MEDIA_SHARE}/tv:/tv:cached
+      - ${MEDIA_SHARE}/movies:/movies:cached
       - ${MEDIA_SHARE}/system:/system:ro,cached
     devices:
       - /dev/dri:/dev/dri
