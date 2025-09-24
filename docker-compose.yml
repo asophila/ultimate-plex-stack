@@ -232,6 +232,99 @@ services:
       - homepage.widget.url=http://bazarr:6767
       - homepage.widget.key=${BAZARR_KEY}
 
+  cleanuparr:
+    image: ghcr.io/cleanuparr/cleanuparr:latest
+    container_name: cleanuparr
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
+      - PORT=11011
+      - BASE_PATH=
+      - UMASK=022
+    volumes:
+      - ${BASE_PATH}/cleanuparr:/config
+      - ${DOWNLOAD_DIR}:/downloads:cached
+      - ${MEDIA_SHARE}:/media:cached
+    ports:
+      - "${CLEANUPARR_PORT:-11011}:11011"
+    networks:
+      - media_net
+    restart: unless-stopped
+    deploy:                                         # Resource limits
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 256M
+    logging:                                        # Limit logging
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "2"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:11011/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    labels:
+      - flame.type=app
+      - flame.name=Cleanuparr
+      - flame.url=http://${HOST_IP}:${CLEANUPARR_PORT:-11011}
+      - flame.icon=broom
+      - homepage.group=Maintenance & Tools
+      - homepage.name=Cleanuparr
+      - homepage.icon=cleanuparr
+      - homepage.href=http://${HOST_IP}:${CLEANUPARR_PORT:-11011}
+      - homepage.description=Download cleanup automation
+      - homepage.widget.type=cleanuparr
+      - homepage.widget.url=http://cleanuparr:${CLEANUPARR_PORT:-11011}
+      - homepage.widget.key=${CLEANUPARR_KEY:-}
+
+  huntarr:
+    image: ghcr.io/plexguide/huntarr:latest
+    container_name: huntarr
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
+    volumes:
+      - ${BASE_PATH}/huntarr:/config
+    ports:
+      - "${HUNTARR_PORT:-9705}:9705"
+    networks:
+      - media_net
+    restart: unless-stopped
+    deploy:                                         # Resource limits
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 512M
+    logging:                                        # Limit logging
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "2"
+    healthcheck:
+      test: ["CMD", "sh", "-c", "netstat -ltn | grep -c ':9705' || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    labels:
+      - flame.type=app
+      - flame.name=Huntarr
+      - flame.url=http://${HOST_IP}:${HUNTARR_PORT:-9705}
+      - flame.icon=magnify
+      - homepage.group=Media Management
+      - homepage.name=Huntarr
+      - homepage.icon=huntarr
+      - homepage.href=http://${HOST_IP}:${HUNTARR_PORT:-9705}
+      - homepage.description=Missing content hunter
+      - homepage.widget.type=huntarr
+      - homepage.widget.url=http://huntarr:${HUNTARR_PORT:-9705}
+      - homepage.widget.key=${HUNTARR_KEY:-}
+
   # === Media Servers ===
   plex:
     image: linuxserver/plex:latest
