@@ -34,12 +34,12 @@ services:
     restart: unless-stopped
     mem_limit: 256M
     memswap_limit: 512M
-    #healthcheck:
-      #test: ["CMD", "curl", "-f", "--silent", "--show-error", "--retry", "3", "http://localhost:${QBIT_PORT:-8080}"]
-      #interval: 30s
-      #timeout: 10s
-      #retries: 3
-      #start_period: 60s
+    healthcheck:
+      test: ["CMD", "sh", "-c", "wget -q --spider http://localhost:8000/v1/publicip/ip"]
+      interval: 30s
+      timeout: 15s
+      retries: 3
+      start_period: 60s
     labels:
       - flame.type=app
       - flame.name=Gluetun VPN
@@ -68,13 +68,14 @@ services:
     mem_limit: 1024M
     memswap_limit: 1536M
     depends_on:
-      - gluetun
+      gluetun:
+        condition: service_healthy
     healthcheck:
-      test: "curl --fail --silent --show-error --retry 3 --max-time 10 http://localhost:8080 || exit 1"
+      test: ["CMD", "sh", "-c", "wget -q --spider http://localhost:8080"]
       interval: 30s
-      timeout: 10s
+      timeout: 15s
       retries: 3
-      start_period: 45s
+      start_period: 60s
     labels:
       - flame.type=app
       - flame.name=qBittorrent
@@ -666,6 +667,9 @@ services:
     restart: always
     environment:
       - AUTOHEAL_CONTAINER_LABEL=all
+      - AUTOHEAL_INTERVAL=30
+      - AUTOHEAL_START_PERIOD=300
+      - AUTOHEAL_DEFAULT_STOP_TIMEOUT=30
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
     networks:
