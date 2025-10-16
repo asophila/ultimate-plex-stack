@@ -67,9 +67,6 @@ services:
     restart: unless-stopped
     mem_limit: 1024M
     memswap_limit: 1536M
-    depends_on:
-      gluetun:
-        condition: service_healthy
     healthcheck:
       test: ["CMD", "sh", "-c", "wget -q --spider http://localhost:8080"]
       interval: 30s
