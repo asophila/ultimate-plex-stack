@@ -683,7 +683,10 @@ services:
   fileflows:
     image: revenz/fileflows:stable
     container_name: fileflows
+    runtime: nvidia
     environment:
+      - NVIDIA_VISIBLE_DEVICES=all
+      - NVIDIA_DRIVER_CAPABILITIES=all
       - PUID=${PUID}
       - PGID=${PGID}
       - TZ=${TZ}
