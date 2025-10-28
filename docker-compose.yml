@@ -237,15 +237,38 @@ services:
       - PUID=${PUID}
       - PGID=${PGID}
       - TZ=${TZ}
-      - WHISPER_MODEL=large  # Options: tiny, base, small, medium, large
-      - WHISPER_THREADS=4
-      - CONCURRENT_TRANSCRIPTIONS=1
-      - PROCADDEDMEDIA=True
-      - PROCMEDIAONSTART=False
-      - NAMESUBLANG=True
-      - SKIPIFINTERNALSUBLANG=True
-      - FORCELANGS=fr,en,es  # French + English priority
-      - DEBUG=False
+      
+      # Model Configuration
+      - WHISPER_MODEL=medium              # Balance of speed/quality
+      - WHISPER_THREADS=4                 # CPU fallback threads
+      - TRANSCRIBE_DEVICE=cuda            # Use your NVIDIA T1000
+      
+      # Language Strategy - AUTO detects if transcribe or translate is needed
+      - TRANSCRIBE_OR_TRANSLATE=transcribe # Default behavior
+      - FORCE_DETECTED_LANGUAGE_TO=       # Leave empty to auto-detect
+      
+      # Subtitle Naming - Important for multiple languages
+      - NAMESUBLANG=True                  # Add language code to filename
+      - SUBTITLE_LANGUAGE_NAMING_TYPE=both # Include both language code and name
+      
+      # Processing Settings
+      - CONCURRENT_TRANSCRIPTIONS=2       # Process 2 files at once
+      - WEBHOOKPORT=9000                  # Bazarr connection port
+      - DEBUG=True                        # Detailed logging
+      - CLEAR_VRAM_ON_COMPLETE=True       # Free GPU memory between jobs
+      
+      # File Management
+      - APPEND=False                      # Create new subtitle files
+      - SKIP_IF_AUDIO_TRACK_IS=           # Don't skip any audio tracks
+      - ONLY_SKIP_IF_SUBGEN_SUBTITLE=True # Only skip if SubGen already generated it
+      
+      # Model and Cache
+      - MODEL_PATH=./models               # Model cache location
+      - LOG_LEVEL=debug
+      
+      # Disable Plex/Jellyfin auto-processing (Bazarr triggers it)
+      - PROCADDEDMEDIA=False
+      - PROCMEDIAONPLAY=False
     volumes:
       - ${BASE_PATH}/subgen:/config
       - ${MEDIA_SHARE}/tv:/tv:cached
