@@ -229,7 +229,51 @@ services:
       - homepage.widget.type=bazarr
       - homepage.widget.url=http://bazarr:6767
       - homepage.widget.key=${BAZARR_KEY}
-
+      
+  subgen:
+    image: mccloud/subgen:latest
+    container_name: subgen
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
+      - WHISPER_MODEL=large  # Options: tiny, base, small, medium, large
+      - WHISPER_THREADS=4
+      - CONCURRENT_TRANSCRIPTIONS=1
+      - PROCADDEDMEDIA=True
+      - PROCMEDIAONSTART=False
+      - NAMESUBLANG=True
+      - SKIPIFINTERNALSUBLANG=True
+      - FORCELANGS=fr,en,es  # French + English priority
+      - DEBUG=False
+    volumes:
+      - ${BASE_PATH}/subgen:/config
+      - ${MEDIA_SHARE}/tv:/tv:cached
+      - ${MEDIA_SHARE}/movies:/movies:cached
+      - ${FAST_MOUNT}/subgen/transcribe:/transcribe  # GPU temp processing on NVMe
+    ports:
+      - "8080:8080"  # Change if conflicts with qBittorrent
+    networks:
+      - media_net
+    restart: unless-stopped
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+    labels:
+      - flame.type=app
+      - flame.name=SubGen
+      - flame.url=http://${HOST_IP}:8080
+      - flame.icon=subtitles
+      - homepage.group=Media Management
+      - homepage.name=SubGen
+      - homepage.icon=subtitles
+      - homepage.href=http://${HOST_IP}:8080
+      - homepage.description=AI subtitle generation
+      
   cleanuparr:
     image: ghcr.io/cleanuparr/cleanuparr:latest
     container_name: cleanuparr
