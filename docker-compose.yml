@@ -252,7 +252,7 @@ services:
       - ${MEDIA_SHARE}/movies:/movies:cached
       - ${FAST_MOUNT}/subgen/transcribe:/transcribe  # GPU temp processing on NVMe
     ports:
-      - "8080:8080"  # Change if conflicts with qBittorrent
+      - "8580:8080"  # Change if conflicts with qBittorrent
     networks:
       - media_net
     restart: unless-stopped
@@ -266,12 +266,12 @@ services:
     labels:
       - flame.type=app
       - flame.name=SubGen
-      - flame.url=http://${HOST_IP}:8080
+      - flame.url=http://${HOST_IP}:8580
       - flame.icon=subtitles
       - homepage.group=Media Management
       - homepage.name=SubGen
       - homepage.icon=subtitles
-      - homepage.href=http://${HOST_IP}:8080
+      - homepage.href=http://${HOST_IP}:8580
       - homepage.description=AI subtitle generation
       
   cleanuparr:
