@@ -34,12 +34,6 @@ services:
     restart: unless-stopped
     mem_limit: 256M
     memswap_limit: 512M
-    healthcheck:
-      test: ["CMD", "wget", "--spider", "-q", "http://127.0.0.1:9999/healthcheck"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 60s
     labels:
       - flame.type=app
       - flame.name=Gluetun VPN
