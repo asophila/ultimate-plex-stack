@@ -34,12 +34,12 @@ services:
     restart: unless-stopped
     mem_limit: 256M
     memswap_limit: 512M
-    #healthcheck:
-      #test: ["CMD", "sh", "-c", "wget -q --spider http://127.0.0.1:9999/healthcheck"]
-      #interval: 30s
-      #timeout: 15s
-      #retries: 3
-      #start_period: 60s
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://127.0.0.1:8080"]  # Test qBittorrent through VPN
+      interval: 60s
+      timeout: 15s
+      retries: 3
+      start_period: 90s
     labels:
       - flame.type=app
       - flame.name=Gluetun VPN
@@ -67,10 +67,13 @@ services:
     restart: unless-stopped
     mem_limit: 1024M
     memswap_limit: 1536M
+    depends_on:
+      gluetun:
+        condition: service_healthy
     healthcheck:
-      test: ["CMD", "sh", "-c", "wget -q --spider http://localhost:8080"]
-      interval: 30s
-      timeout: 15s
+      test: ["CMD", "sh", "-c", "pgrep qbittorrent-nox"]  # Just check if process is running
+      interval: 60s
+      timeout: 10s
       retries: 3
       start_period: 60s
     labels:
@@ -736,6 +739,7 @@ services:
     image: willfarrell/autoheal:latest
     container_name: autoheal
     restart: always
+    privileged: true  # ADD THIS - needed to restart containers
     environment:
       - AUTOHEAL_CONTAINER_LABEL=all
       - AUTOHEAL_INTERVAL=30
