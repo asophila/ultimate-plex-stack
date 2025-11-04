@@ -749,6 +749,7 @@ services:
     image: revenz/fileflows:stable
     container_name: fileflows
     runtime: nvidia
+    privileged: true
     environment:
       - NVIDIA_VISIBLE_DEVICES=all
       - NVIDIA_DRIVER_CAPABILITIES=all
