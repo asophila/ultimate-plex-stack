@@ -762,6 +762,7 @@ services:
       - ${FAST_MOUNT}/fileflows/logs:/app/Logs      # CHANGED: NVMe logs
       - /var/run/docker.sock:/var/run/docker.sock:ro
       - ${MEDIA_SHARE}:/library:cached
+      - /usr/lib/x86_64-linux-gnu/nvidia:/usr/lib/x86_64-linux-gnu/nvidia:ro
     ports:
       - "${FILEFLOWS_PORT:-19200}:5000"
     networks:
