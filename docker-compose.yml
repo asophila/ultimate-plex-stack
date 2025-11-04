@@ -35,11 +35,11 @@ services:
     mem_limit: 256M
     memswap_limit: 512M
     healthcheck:
-      test: ["CMD", "wget", "--spider", "-q", "http://127.0.0.1:8080"]  # Test qBittorrent through VPN
-      interval: 60s
-      timeout: 15s
+      test: ["CMD", "wget", "--spider", "-q", "http://127.0.0.1:9999/healthcheck"]
+      interval: 30s
+      timeout: 10s
       retries: 3
-      start_period: 90s
+      start_period: 60s
     labels:
       - flame.type=app
       - flame.name=Gluetun VPN
@@ -69,7 +69,7 @@ services:
     memswap_limit: 1536M
     depends_on:
       gluetun:
-        condition: service_healthy
+        condition: service_started
     healthcheck:
       test: ["CMD", "sh", "-c", "pgrep qbittorrent-nox"]  # Just check if process is running
       interval: 60s
