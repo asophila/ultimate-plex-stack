@@ -387,6 +387,62 @@ services:
       - homepage.widget.url=http://huntarr:${HUNTARR_PORT:-9705}
       - homepage.widget.key=${HUNTARR_KEY:-}
 
+  unpackerr:
+    image: golift/unpackerr:latest
+    container_name: unpackerr
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
+      # Sonarr Integration
+      - UN_SONARR_0_URL=http://sonarr:8989
+      - UN_SONARR_0_API_KEY=${SONARR_KEY}
+      - UN_SONARR_0_PATHS_0=/downloads
+      # Radarr Integration
+      - UN_RADARR_0_URL=http://radarr:7878
+      - UN_RADARR_0_API_KEY=${RADARR_KEY}
+      - UN_RADARR_0_PATHS_0=/downloads
+      # Processing Settings
+      - UN_DEBUG=false
+      - UN_INTERVAL=2m
+      - UN_START_DELAY=1m
+      - UN_RETRY_DELAY=5m
+      - UN_MAX_RETRIES=3
+      - UN_PARALLEL=1
+      - UN_FILE_MODE=0644
+      - UN_DIR_MODE=0755
+    volumes:
+      - ${DOWNLOAD_DIR}:/downloads
+      - ${BASE_PATH}/unpackerr:/config
+    networks:
+      - media_net
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 512M
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "2"
+    healthcheck:
+      test: ["CMD", "pgrep", "-f", "unpackerr"]
+      interval: 60s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    labels:
+      - flame.type=app
+      - flame.name=Unpackerr
+      - flame.url=http://${HOST_IP}:${UNPACKERR_PORT:-5656}
+      - flame.icon=package-variant
+      - homepage.group=Media Management
+      - homepage.name=Unpackerr
+      - homepage.icon=unpackerr
+      - homepage.href=http://${HOST_IP}:${UNPACKERR_PORT:-5656}
+      - homepage.description=Archive extraction for Sonarr/Radarr
   # === Media Servers ===
   plex:
     image: linuxserver/plex:latest
