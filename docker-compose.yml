@@ -390,6 +390,11 @@ services:
   unpackerr:
     image: golift/unpackerr:latest
     container_name: unpackerr
+    depends_on:
+      sonarr:
+        condition: service_healthy
+      radarr:
+        condition: service_healthy
     environment:
       - PUID=${PUID}
       - PGID=${PGID}
