@@ -456,9 +456,12 @@ services:
       resources:
         reservations:
           devices:
-            - driver: nvidia
-              count: all
-              capabilities: [gpu]
+            - /dev/nvidia0:/dev/nvidia0
+            - /dev/nvidiactl:/dev/nvidiactl
+            - /dev/nvidia-modeset:/dev/nvidia-modeset
+            - /dev/nvidia-uvm:/dev/nvidia-uvm
+            - /dev/nvidia-uvm-tools:/dev/nvidia-uvm-tools
+            - /dev/dri:/dev/dri
     network_mode: host
     environment:
       - PUID=${PUID}
@@ -490,7 +493,7 @@ services:
       timeout: 10s
       retries: 3
       start_period: 60s
-    privileged: true
+    #privileged: true
     labels:
       - flame.type=app
       - flame.name=Plex
@@ -574,6 +577,13 @@ services:
   jellyfin:
     image: jellyfin/jellyfin:latest
     container_name: jellyfin
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
     environment:
       - PUID=${PUID}
       - PGID=${PGID}
@@ -582,6 +592,8 @@ services:
       - JELLYFIN_DATA_DIR=/config
       - JELLYFIN_CACHE_DIR=/cache
       - JELLYFIN_LOG_DIR=/config/log
+      - NVIDIA_VISIBLE_DEVICES=all
+      - NVIDIA_DRIVER_CAPABILITIES=all
     volumes:
       - ${BASE_PATH}/jellyfin/config:/config
       - ${FAST_MOUNT}/jellyfin/cache:/cache         # CHANGED: Cache on NVMe
