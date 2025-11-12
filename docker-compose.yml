@@ -452,17 +452,14 @@ services:
   plex:
     image: linuxserver/plex:latest
     container_name: plex
+    network_mode: host
     deploy:
       resources:
         reservations:
           devices:
-            - /dev/nvidia0:/dev/nvidia0
-            - /dev/nvidiactl:/dev/nvidiactl
-            - /dev/nvidia-modeset:/dev/nvidia-modeset
-            - /dev/nvidia-uvm:/dev/nvidia-uvm
-            - /dev/nvidia-uvm-tools:/dev/nvidia-uvm-tools
-            - /dev/dri:/dev/dri
-    network_mode: host
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
     environment:
       - PUID=${PUID}
       - PGID=${PGID}
@@ -479,10 +476,8 @@ services:
       - ${MEDIA_SHARE}/tv:/tv:cached
       - ${MEDIA_SHARE}/movies:/movies:cached
       - ${MEDIA_SHARE}/system:/system:ro,cached
-    devices:
-      - /dev/dri:/dev/dri
     restart: unless-stopped
-    logging:                                        # NEW: Limit logging
+    logging:
       driver: "json-file"
       options:
         max-size: "10m"
@@ -493,21 +488,12 @@ services:
       timeout: 10s
       retries: 3
       start_period: 60s
-    #privileged: true
     labels:
       - flame.type=app
       - flame.name=Plex
       - flame.url=http://${HOST_IP}:32400/web
       - flame.icon=plex
-      - homepage.group=Media Servers
-      - homepage.name=Plex Media Server
-      - homepage.icon=plex
-      - homepage.href=http://${HOST_IP}:32400/web
-      - homepage.description=Media streaming server
-      - homepage.widget.type=plex
-      - homepage.widget.url=http://${HOST_IP}:32400
-      - homepage.widget.key=${PLEX_TOKEN}
-
+   
   wizarr:
     image: ghcr.io/wizarrrr/wizarr:latest
     container_name: wizarr
