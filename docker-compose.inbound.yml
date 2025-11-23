@@ -22,7 +22,7 @@ services:
       - SERVER_COUNTRIES=${SERVER_COUNTRIES}
       - WIREGUARD_PERSISTENT_KEEPALIVE=25
       - FIREWALL=on
-      - FIREWALL_OUTBOUND_SUBNETS=172.16.0.0/12,192.168.0.0/16 
+      - FIREWALL_OUTBOUND_SUBNETS=172.16.0.0/12,192.168.0.0/16
       - DOT=off
       - LOG_LEVEL=info
       - UPDATER_PERIOD=24h
@@ -41,7 +41,7 @@ services:
       - flame.name=Gluetun VPN
       - flame.url=http://${HOST_IP}:${QBIT_PORT:-8080}
       - flame.icon=vpn
- 
+
   qbittorrent:
     image: linuxserver/qbittorrent:latest
     container_name: qbittorrent
@@ -182,7 +182,7 @@ services:
       - flame.name=Bazarr
       - flame.url=http://${HOST_IP}:${BAZARR_PORT:-6767}
       - flame.icon=subtitles-outline
-      
+
   subgen:
     image: mccloud/subgen:latest
     container_name: subgen
@@ -190,35 +190,35 @@ services:
       - PUID=${PUID}
       - PGID=${PGID}
       - TZ=${TZ}
-      
+
       # Model Configuration
       - WHISPER_MODEL=medium              # Balance of speed/quality
       - WHISPER_THREADS=4                 # CPU fallback threads
       - TRANSCRIBE_DEVICE=cuda            # Use your NVIDIA T1000
-      
+
       # Language Strategy - AUTO detects if transcribe or translate is needed
       - TRANSCRIBE_OR_TRANSLATE=transcribe # Default behavior
       - FORCE_DETECTED_LANGUAGE_TO=       # Leave empty to auto-detect
-      
+
       # Subtitle Naming - Important for multiple languages
       - NAMESUBLANG=True                  # Add language code to filename
       - SUBTITLE_LANGUAGE_NAMING_TYPE=both # Include both language code and name
-      
+
       # Processing Settings
       - CONCURRENT_TRANSCRIPTIONS=2       # Process 2 files at once
       - WEBHOOKPORT=9000                  # Bazarr connection port
       - DEBUG=True                        # Detailed logging
       - CLEAR_VRAM_ON_COMPLETE=True       # Free GPU memory between jobs
-      
+
       # File Management
       - APPEND=False                      # Create new subtitle files
       - SKIP_IF_AUDIO_TRACK_IS=           # Don't skip any audio tracks
       - ONLY_SKIP_IF_SUBGEN_SUBTITLE=True # Only skip if SubGen already generated it
-      
+
       # Model and Cache
       - MODEL_PATH=./models               # Model cache location
       - LOG_LEVEL=debug
-      
+
       # Disable Plex/Jellyfin auto-processing (Bazarr triggers it)
       - PROCADDEDMEDIA=False
       - PROCMEDIAONPLAY=False
@@ -244,7 +244,7 @@ services:
       - flame.name=SubGen
       - flame.url=http://${HOST_IP}:8580
       - flame.icon=subtitles
-      
+
   cleanuparr:
     image: ghcr.io/cleanuparr/cleanuparr:latest
     container_name: cleanuparr
@@ -378,183 +378,8 @@ services:
       - flame.name=Unpackerr
       - flame.url=http://${HOST_IP}:${UNPACKERR_PORT:-5656}
       - flame.icon=package-variant
-  # === Media Servers ===
-  plex:
-    image: linuxserver/plex:latest
-    container_name: plex
-    network_mode: host
-    deploy:
-      resources:
-        reservations:
-          devices:
-            - driver: nvidia
-              count: all
-              capabilities: [gpu]
-    environment:
-      - PUID=${PUID}
-      - PGID=${PGID}
-      - TZ=${TZ}
-      - VERSION=docker
-      - PLEX_CLAIM=${PLEX_CLAIM}
-      - NVIDIA_DRIVER_CAPABILITIES=all
-      - NVIDIA_VISIBLE_DEVICES=all
-      - PLEX_DEBUG=1
-      - PLEX_MEDIA_SERVER_USE_SYSLOG=true
-    volumes:
-      - ${FAST_MOUNT}/plex/config:/config           
-      - ${FAST_MOUNT}/plex/transcode:/transcode
-      - ${MEDIA_SHARE}/tv:/tv:cached
-      - ${MEDIA_SHARE}/movies:/movies:cached
-      - ${MEDIA_SHARE}/system:/system:ro,cached
-    restart: unless-stopped
-    logging:
-      driver: "json-file"
-      options:
-        max-size: "10m"
-        max-file: "2"
-    healthcheck:
-      test: ["CMD", "curl", "-f", "--silent", "--show-error", "http://localhost:32400/identity"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 60s
-    labels:
-      - flame.type=app
-      - flame.name=Plex
-      - flame.url=http://${HOST_IP}:32400/web
-      - flame.icon=plex
-   
-  wizarr:
-    image: ghcr.io/wizarrrr/wizarr:latest
-    container_name: wizarr
-    environment:
-      - PUID=${PUID}
-      - PGID=${PGID}
-      - TZ=${TZ}
-    volumes:
-      - ${BASE_PATH}/wizarr/database:/data/database  
-    ports:
-      - "${WIZARR_PORT:-5690}:5690"
-    networks:
-      - media_net
-    restart: unless-stopped
-    healthcheck:
-      test: ["CMD", "curl", "-f", "--silent", "--show-error", "http://localhost:5690/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 30s
-    labels:
-      - flame.type=app
-      - flame.name=Wizarr
-      - flame.url=http://${HOST_IP}:${WIZARR_PORT:-5690}
-      - flame.icon=account-plus
 
-
-  tautulli:
-    image: ghcr.io/tautulli/tautulli:latest
-    container_name: tautulli
-    environment:
-      - PUID=${PUID}
-      - PGID=${PGID}
-      - TZ=${TZ}
-    volumes:
-      - ${BASE_PATH}/tautulli:/config
-    ports:
-      - "${TAUTULLI_PORT:-8181}:8181"
-    networks:
-      - media_net
-    restart: unless-stopped
-    healthcheck:
-      test: ["CMD", "curl", "-f", "--silent", "--show-error", "http://localhost:8181/status"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 30s
-    labels:
-      - flame.type=app
-      - flame.name=Tautulli
-      - flame.url=http://${HOST_IP}:${TAUTULLI_PORT:-8181}
-      - flame.icon=chart-line
-      
-  jellyfin:
-    image: jellyfin/jellyfin:latest
-    container_name: jellyfin
-    deploy:
-      resources:
-        reservations:
-          devices:
-            - driver: nvidia
-              count: all
-              capabilities: [gpu]
-    environment:
-      - PUID=${PUID}
-      - PGID=${PGID}
-      - TZ=${TZ}
-      - JELLYFIN_CONFIG_DIR=/config/config
-      - JELLYFIN_DATA_DIR=/config
-      - JELLYFIN_CACHE_DIR=/cache
-      - JELLYFIN_LOG_DIR=/config/log
-      - NVIDIA_VISIBLE_DEVICES=all
-      - NVIDIA_DRIVER_CAPABILITIES=all
-    volumes:
-      - ${BASE_PATH}/jellyfin/config:/config
-      - ${FAST_MOUNT}/jellyfin/cache:/cache         # CHANGED: Cache on NVMe
-      - ${MEDIA_SHARE}/tv:/tv:ro,cached
-      - ${MEDIA_SHARE}/movies:/movies:ro,cached
-      - ${MEDIA_SHARE}/music:/music:ro,cached
-      - ${MEDIA_SHARE}/system:/system:ro,cached
-    ports:
-      - "${JELLYFIN_PORT:-8096}:8096"
-      - "7359:7359/udp"
-      - "1900:1900/udp"
-    networks:
-      - media_net
-    restart: unless-stopped
-    logging:                                        # NEW: Limit logging
-      driver: "json-file"
-      options:
-        max-size: "10m"
-        max-file: "2"
-    healthcheck:
-      test: ["CMD", "curl", "-f", "--silent", "--show-error", "http://localhost:8096/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 60s
-    labels:
-      - flame.type=app
-      - flame.name=Jellyfin
-      - flame.url=http://${HOST_IP}:${JELLYFIN_PORT:-8096}
-      - flame.icon=jellyfish-outline
-
-  # === Optional Services ===
-  watchtower:
-    image: containrrr/watchtower:latest
-    container_name: watchtower
-    environment:
-      - TZ=${TZ}
-      - WATCHTOWER_CLEANUP=true
-      - WATCHTOWER_INCLUDE_STOPPED=false
-      - WATCHTOWER_SCHEDULE=${WATCHTOWER_SCHEDULE:-0 3 0 * * 6} 
-      - WATCHTOWER_NOTIFICATION_REPORT=true
-      - WATCHTOWER_NOTIFICATIONS=shoutrrr
-      - WATCHTOWER_NOTIFICATION_URL=${WATCHTOWER_NOTIFICATION_URL:-}
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock:ro
-      - /etc/localtime:/etc/localtime:ro
-    ports:
-      - "${WATCHTOWER_PORT:-8081}:8080"
-    networks:
-      - media_net
-    restart: unless-stopped
-    labels:
-      - flame.type=app
-      - flame.name=Watchtower
-      - flame.url=http://${HOST_IP}:${WATCHTOWER_PORT:-8081}
-      - flame.icon=update
-
-      
+  # === Support Services ===
   flaresolverr:
     image: ghcr.io/flaresolverr/flaresolverr:latest
     container_name: flaresolverr
@@ -580,113 +405,7 @@ services:
       - flame.url=http://${HOST_IP}:${FLARESOLVERR_PORT:-8191}
       - flame.icon=puzzle
 
-  overseerr:
-    image: lscr.io/linuxserver/overseerr:latest
-    container_name: overseerr
-    environment:
-      - PUID=${PUID}
-      - PGID=${PGID}
-      - TZ=${TZ}
-    volumes:
-      - ${BASE_PATH}/overseerr:/config
-    ports:
-      - "${OVERSEERR_PORT:-5055}:5055"
-    networks:
-      - media_net
-    restart: unless-stopped
-    healthcheck:
-      test: ["CMD", "curl", "-f", "--silent", "--show-error", "http://localhost:5055/api/v1/status"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 30s
-    labels:
-      - flame.type=app
-      - flame.name=Overseerr
-      - flame.url=http://${HOST_IP}:${OVERSEERR_PORT:-5055}
-      - flame.icon=format-list-bulleted-triangle
-
-  maintainerr:
-    image: ghcr.io/jorenn92/maintainerr:latest
-    container_name: maintainerr
-    user: ${PUID}:${PGID}
-    environment:
-      - TZ=${TZ}
-      - UI_PORT=${MAINTAINERR_PORT:-6246}
-      - API_PORT=${MAINTAINERR_API_PORT:-3001}
-    volumes:
-      - ${BASE_PATH}/maintainerr:/opt/data:rw
-    ports:
-      - "${MAINTAINERR_PORT:-6246}:6246"
-    networks:
-      - media_net
-    restart: unless-stopped
-    deploy:                                         # NEW: Resource limits
-      resources:
-        limits:
-          cpus: '1.0'
-          memory: 512M
-    logging:                                        # NEW: Limit logging
-      driver: "json-file"
-      options:
-        max-size: "5m"
-        max-file: "2"
-    #healthcheck:
-      #test: ["CMD", "wget", "-qO-", "http://localhost:${MAINTAINERR_PORT:-6246}/health"]
-      #interval: 30s
-      #timeout: 10s
-      #retries: 3
-      #start_period: 10s
-    labels:
-      - flame.type=app
-      - flame.name=Maintainerr
-      - flame.url=http://${HOST_IP}:${MAINTAINERR_PORT:-6246}
-      - flame.icon=trash-can-outline
-
-  flame:
-    image: pawelmalak/flame:latest
-    container_name: flame
-    environment:
-      - PUID=${PUID}
-      - PGID=${PGID}
-      - TZ=${TZ}
-      - PASSWORD=${FLAME_PASSWORD:-flame}
-    volumes:
-      - ${BASE_PATH}/flame:/app/data
-      - /var/run/docker.sock:/var/run/docker.sock
-    ports:
-      - "${FLAME_PORT:-1313}:5005"
-    networks:
-      - media_net
-    restart: unless-stopped
-    healthcheck:
-      test: ["CMD", "wget", "--spider", "-q", "http://localhost:5005"]
-      interval: 1m
-      timeout: 10s
-      retries: 3
-      start_period: 20s
-    labels:
-      - flame.type=app
-      - flame.name=Flame
-      - flame.url=http://${HOST_IP}:${FLAME_PORT:-5005}
-      - flame.icon=fire
-
-  autoheal:
-    image: willfarrell/autoheal:latest
-    container_name: autoheal
-    restart: always
-    privileged: true  # ADD THIS - needed to restart containers
-    environment:
-      - AUTOHEAL_CONTAINER_LABEL=all
-      - AUTOHEAL_INTERVAL=30
-      - AUTOHEAL_START_PERIOD=300
-      - AUTOHEAL_DEFAULT_STOP_TIMEOUT=30
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
-    networks:
-      - media_net
-
-# === Transcoding Services ===
+  # === Transcoding Services ===
   fileflows:
     image: revenz/fileflows:stable
     container_name: fileflows
@@ -734,6 +453,47 @@ services:
       - flame.name=FileFlows
       - flame.url=http://${HOST_IP}:${FILEFLOWS_PORT:-19200}
       - flame.icon=transfer
+
+  # === Monitoring & Maintenance ===
+  watchtower:
+    image: containrrr/watchtower:latest
+    container_name: watchtower
+    environment:
+      - TZ=${TZ}
+      - WATCHTOWER_CLEANUP=true
+      - WATCHTOWER_INCLUDE_STOPPED=false
+      - WATCHTOWER_SCHEDULE=${WATCHTOWER_SCHEDULE:-0 3 0 * * 6}
+      - WATCHTOWER_NOTIFICATION_REPORT=true
+      - WATCHTOWER_NOTIFICATIONS=shoutrrr
+      - WATCHTOWER_NOTIFICATION_URL=${WATCHTOWER_NOTIFICATION_URL:-}
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - /etc/localtime:/etc/localtime:ro
+    ports:
+      - "${WATCHTOWER_PORT:-8081}:8080"
+    networks:
+      - media_net
+    restart: unless-stopped
+    labels:
+      - flame.type=app
+      - flame.name=Watchtower
+      - flame.url=http://${HOST_IP}:${WATCHTOWER_PORT:-8081}
+      - flame.icon=update
+
+  autoheal:
+    image: willfarrell/autoheal:latest
+    container_name: autoheal
+    restart: always
+    privileged: true  # ADD THIS - needed to restart containers
+    environment:
+      - AUTOHEAL_CONTAINER_LABEL=all
+      - AUTOHEAL_INTERVAL=30
+      - AUTOHEAL_START_PERIOD=300
+      - AUTOHEAL_DEFAULT_STOP_TIMEOUT=30
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    networks:
+      - media_net
 
 networks:
   media_net:

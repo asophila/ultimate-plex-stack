@@ -1,0 +1,250 @@
+version: "3.8"
+
+services:
+  # === Media Servers ===
+  plex:
+    image: linuxserver/plex:latest
+    container_name: plex
+    network_mode: host
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
+      - VERSION=docker
+      - PLEX_CLAIM=${PLEX_CLAIM}
+      - NVIDIA_DRIVER_CAPABILITIES=all
+      - NVIDIA_VISIBLE_DEVICES=all
+      - PLEX_DEBUG=1
+      - PLEX_MEDIA_SERVER_USE_SYSLOG=true
+    volumes:
+      - ${FAST_MOUNT}/plex/config:/config
+      - ${FAST_MOUNT}/plex/transcode:/transcode
+      - ${MEDIA_SHARE}/tv:/tv:cached
+      - ${MEDIA_SHARE}/movies:/movies:cached
+      - ${MEDIA_SHARE}/system:/system:ro,cached
+    restart: unless-stopped
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "2"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "--silent", "--show-error", "http://localhost:32400/identity"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    labels:
+      - flame.type=app
+      - flame.name=Plex
+      - flame.url=http://${HOST_IP}:32400/web
+      - flame.icon=plex
+
+  jellyfin:
+    image: jellyfin/jellyfin:latest
+    container_name: jellyfin
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
+      - JELLYFIN_CONFIG_DIR=/config/config
+      - JELLYFIN_DATA_DIR=/config
+      - JELLYFIN_CACHE_DIR=/cache
+      - JELLYFIN_LOG_DIR=/config/log
+      - NVIDIA_VISIBLE_DEVICES=all
+      - NVIDIA_DRIVER_CAPABILITIES=all
+    volumes:
+      - ${BASE_PATH}/jellyfin/config:/config
+      - ${FAST_MOUNT}/jellyfin/cache:/cache         # CHANGED: Cache on NVMe
+      - ${MEDIA_SHARE}/tv:/tv:ro,cached
+      - ${MEDIA_SHARE}/movies:/movies:ro,cached
+      - ${MEDIA_SHARE}/music:/music:ro,cached
+      - ${MEDIA_SHARE}/system:/system:ro,cached
+    ports:
+      - "${JELLYFIN_PORT:-8096}:8096"
+      - "7359:7359/udp"
+      - "1900:1900/udp"
+    networks:
+      - media_net
+    restart: unless-stopped
+    logging:                                        # NEW: Limit logging
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "2"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "--silent", "--show-error", "http://localhost:8096/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    labels:
+      - flame.type=app
+      - flame.name=Jellyfin
+      - flame.url=http://${HOST_IP}:${JELLYFIN_PORT:-8096}
+      - flame.icon=jellyfish-outline
+
+  # === Request Management ===
+  overseerr:
+    image: lscr.io/linuxserver/overseerr:latest
+    container_name: overseerr
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
+    volumes:
+      - ${BASE_PATH}/overseerr:/config
+    ports:
+      - "${OVERSEERR_PORT:-5055}:5055"
+    networks:
+      - media_net
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "--silent", "--show-error", "http://localhost:5055/api/v1/status"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    labels:
+      - flame.type=app
+      - flame.name=Overseerr
+      - flame.url=http://${HOST_IP}:${OVERSEERR_PORT:-5055}
+      - flame.icon=format-list-bulleted-triangle
+
+  wizarr:
+    image: ghcr.io/wizarrrr/wizarr:latest
+    container_name: wizarr
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
+    volumes:
+      - ${BASE_PATH}/wizarr/database:/data/database
+    ports:
+      - "${WIZARR_PORT:-5690}:5690"
+    networks:
+      - media_net
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "--silent", "--show-error", "http://localhost:5690/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    labels:
+      - flame.type=app
+      - flame.name=Wizarr
+      - flame.url=http://${HOST_IP}:${WIZARR_PORT:-5690}
+      - flame.icon=account-plus
+
+  # === Analytics & Monitoring ===
+  tautulli:
+    image: ghcr.io/tautulli/tautulli:latest
+    container_name: tautulli
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
+    volumes:
+      - ${BASE_PATH}/tautulli:/config
+    ports:
+      - "${TAUTULLI_PORT:-8181}:8181"
+    networks:
+      - media_net
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "--silent", "--show-error", "http://localhost:8181/status"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    labels:
+      - flame.type=app
+      - flame.name=Tautulli
+      - flame.url=http://${HOST_IP}:${TAUTULLI_PORT:-8181}
+      - flame.icon=chart-line
+
+  # === Maintenance ===
+  maintainerr:
+    image: ghcr.io/jorenn92/maintainerr:latest
+    container_name: maintainerr
+    user: ${PUID}:${PGID}
+    environment:
+      - TZ=${TZ}
+      - UI_PORT=${MAINTAINERR_PORT:-6246}
+      - API_PORT=${MAINTAINERR_API_PORT:-3001}
+    volumes:
+      - ${BASE_PATH}/maintainerr:/opt/data:rw
+    ports:
+      - "${MAINTAINERR_PORT:-6246}:6246"
+    networks:
+      - media_net
+    restart: unless-stopped
+    deploy:                                         # NEW: Resource limits
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 512M
+    logging:                                        # NEW: Limit logging
+      driver: "json-file"
+      options:
+        max-size: "5m"
+        max-file: "2"
+    #healthcheck:
+      #test: ["CMD", "wget", "-qO-", "http://localhost:${MAINTAINERR_PORT:-6246}/health"]
+      #interval: 30s
+      #timeout: 10s
+      #retries: 3
+      #start_period: 10s
+    labels:
+      - flame.type=app
+      - flame.name=Maintainerr
+      - flame.url=http://${HOST_IP}:${MAINTAINERR_PORT:-6246}
+      - flame.icon=trash-can-outline
+
+  # === Dashboard ===
+  flame:
+    image: pawelmalak/flame:latest
+    container_name: flame
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
+      - PASSWORD=${FLAME_PASSWORD:-flame}
+    volumes:
+      - ${BASE_PATH}/flame:/app/data
+      - /var/run/docker.sock:/var/run/docker.sock
+    ports:
+      - "${FLAME_PORT:-1313}:5005"
+    networks:
+      - media_net
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:5005"]
+      interval: 1m
+      timeout: 10s
+      retries: 3
+      start_period: 20s
+    labels:
+      - flame.type=app
+      - flame.name=Flame
+      - flame.url=http://${HOST_IP}:${FLAME_PORT:-5005}
+      - flame.icon=fire
+
+networks:
+  media_net:
+    driver: bridge
