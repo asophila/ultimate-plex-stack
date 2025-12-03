@@ -716,8 +716,6 @@ services:
     networks:
       - media_net
     restart: unless-stopped
-    devices:
-      - /dev/dri:/dev/dri
     logging:                                        # NEW: Limit logging
       driver: "json-file"
       options:
