@@ -388,16 +388,16 @@ services:
         reservations:
           devices:
             - driver: nvidia
-              count: all
-              capabilities: [gpu]
+              count: 1
+              capabilities: [gpu, compute, video, utility]
     environment:
       - PUID=${PUID}
       - PGID=${PGID}
       - TZ=${TZ}
       - VERSION=docker
       - PLEX_CLAIM=${PLEX_CLAIM}
-      - NVIDIA_DRIVER_CAPABILITIES=all
       - NVIDIA_VISIBLE_DEVICES=all
+      - NVIDIA_DRIVER_CAPABILITIES=compute,video,utility
       - PLEX_DEBUG=1
       - PLEX_MEDIA_SERVER_USE_SYSLOG=true
     volumes:
@@ -695,11 +695,11 @@ services:
         reservations:
           devices:
             - driver: nvidia
-              count: all
-              capabilities: [gpu, compute, utility]
+              count: 1
+              capabilities: [gpu, compute, video, utility]
     environment:
       - NVIDIA_VISIBLE_DEVICES=all
-      - NVIDIA_DRIVER_CAPABILITIES=all
+      - NVIDIA_DRIVER_CAPABILITIES=compute,video,utility
       - PUID=${PUID}
       - PGID=${PGID}
       - TZ=${TZ}
