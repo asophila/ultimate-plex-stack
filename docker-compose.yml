@@ -326,6 +326,9 @@ services:
     image: ghcr.io/manimatter/decluttarr:latest
     container_name: decluttarr
     restart: unless-stopped
+    volumes:
+      - ${MEDIA_SHARE}/tv:/media/tv:ro,cached
+      - ${MEDIA_SHARE}/movies:/media/movies:ro,cached
     environment:
       TZ: ${TZ}
       PUID: ${PUID}
