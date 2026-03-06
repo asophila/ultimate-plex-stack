@@ -323,15 +323,39 @@ services:
       - flame.icon=magnify
 
   decluttarr:
-    image: ghcr.io/manimatter/decluttarr:latest                                     
-    container_name: decluttarr                            
+    image: ghcr.io/manimatter/decluttarr:latest
+    container_name: decluttarr
+    restart: unless-stopped
     environment:
-      - TZ=${TZ}
-    volumes:
-      - ${BASE_PATH}/decluttarr/config:/app/config:ro
+      TZ: ${TZ}
+      PUID: ${PUID}
+      PGID: ${PGID}
+      LOG_LEVEL: INFO
+      TIMER: 30
+      # --- Jobs ---
+      REMOVE_STALLED: True
+      REMOVE_SLOW: |
+        min_speed: 150
+        max_strikes: 3
+      REMOVE_FAILED_DOWNLOADS: True
+      REMOVE_FAILED_IMPORTS: |
+        message_patterns:
+          - "Not a Custom Format upgrade for existing*"
+          - "Not an upgrade for existing*"
+      REMOVE_ORPHANS: True
+      # --- Instances ---
+      SONARR: >
+        - base_url: "http://sonarr:8989"
+          api_key: "${SONARR_KEY}"
+      RADARR: >
+        - base_url: "http://radarr:7878"
+          api_key: "${RADARR_KEY}"
+      QBITTORRENT: >
+        - base_url: "http://192.168.31.101:8080"
+          username: "admin"
+          password: "${QBIT_PASS}"
     networks:
       - media_net
-    restart: unless-stopped
     logging:
       driver: "json-file"
       options:
@@ -340,7 +364,6 @@ services:
     labels:
       - flame.type=app
       - flame.name=Decluttarr
-      - flame.url=http://${HOST_IP}:7474
       - flame.icon=broom
         
   unpackerr:
