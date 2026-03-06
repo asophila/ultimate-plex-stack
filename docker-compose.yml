@@ -328,7 +328,7 @@ services:
     environment:
       - TZ=${TZ}
     volumes:
-      - ${BASE_PATH}/decluttarr/config.yaml:/app/config.yaml:ro
+      - ${BASE_PATH}/decluttarr/config:/app/config:ro
     networks:
       - media_net
     restart: unless-stopped
