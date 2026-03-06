@@ -323,55 +323,26 @@ services:
       - flame.icon=magnify
 
   decluttarr:
-      image: ghcr.io/manimatter/decluttarr:latest
-      container_name: decluttarr
-      environment:
-        - PUID=${PUID}
-        - PGID=${PGID}
-        - TZ=${TZ}
-        - LOG_LEVEL=INFO
-
-        # --- Radarr ---
-        - RADARR_URL=http://radarr:7878
-        - RADARR_KEY=${RADARR_KEY}
-
-        # --- Sonarr ---
-        - SONARR_URL=http://sonarr:8989
-        - SONARR_KEY=${SONARR_KEY}
-
-      # --- qBittorrent (via host IP because it lives inside gluetun's network) ---
-        - QBITTORRENT_URL=http://192.168.31.101:8080
-        - QBITTORRENT_USERNAME=admin                 # FILL IN — qBit WebUI username
-        - QBITTORRENT_PASSWORD=${QBIT_PASS}
-
-      # --- Removal behaviour (reasonably aggressive) ---
-        - REMOVE_STALLED=true
-        - REMOVE_SLOW=true
-        - MIN_DOWNLOAD_SPEED=75         # KB/s — remove if slower than this sustained
-        - STALLED_DELAY=180             # Minutes stalled before removal
-        - SLOW_DELAY=600                # Minutes slow before removal
-        - PERMITTED_ATTEMPTS=3          # Re-search up to 3 times before blacklisting
-        - REMOVE_FAILED=true
-        - REMOVE_FAILED_IMPORTS=true
-        - REMOVE_ORPHANED=true          # Clean up items no longer tracked by *arr
-        - FAILED_IMPORT_MESSAGE_PATTERNS=["Not an upgrade","Not a Custom Format upgrade","Already in queue"]
-
-      # --- Scheduling ---
-        - RUN_PERIODIC_RESCHEDULE=30    # Re-check every 30 minutes
-      networks:
-        - media_net
-      restart: unless-stopped
-      logging:
-        driver: "json-file"
-        options:
-          max-size: "5m"
-          max-file: "2"
-      labels:
-        - flame.type=app
-        - flame.name=Decluttarr
-        - flame.url=http://${HOST_IP}:7474
-        - flame.icon=broom
-
+    image: ghcr.io/manimatter/decluttarr:latest                                     
+    container_name: decluttarr                            
+    environment:
+      - TZ=${TZ}
+    volumes:
+      - ${BASE_PATH}/decluttarr/config.yaml:/app/config.yaml:ro
+    networks:
+      - media_net
+    restart: unless-stopped
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "5m"
+        max-file: "2"
+    labels:
+      - flame.type=app
+      - flame.name=Decluttarr
+      - flame.url=http://${HOST_IP}:7474
+      - flame.icon=broom
+        
   unpackerr:
     image: golift/unpackerr:latest
     container_name: unpackerr
