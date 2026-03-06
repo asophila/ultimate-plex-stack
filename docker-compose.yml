@@ -347,9 +347,9 @@ services:
       # --- Removal behaviour (reasonably aggressive) ---
         - REMOVE_STALLED=true
         - REMOVE_SLOW=true
-        - MIN_DOWNLOAD_SPEED=150        # KB/s — remove if slower than this sustained
-        - STALLED_DELAY=60              # Minutes stalled before removal
-        - SLOW_DELAY=60                 # Minutes slow before removal
+        - MIN_DOWNLOAD_SPEED=75         # KB/s — remove if slower than this sustained
+        - STALLED_DELAY=180             # Minutes stalled before removal
+        - SLOW_DELAY=600                # Minutes slow before removal
         - PERMITTED_ATTEMPTS=3          # Re-search up to 3 times before blacklisting
         - REMOVE_FAILED=true
         - REMOVE_FAILED_IMPORTS=true
