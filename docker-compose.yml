@@ -338,8 +338,8 @@ services:
       # --- Jobs ---
       REMOVE_STALLED: True
       REMOVE_SLOW: |
-        min_speed: 150
-        max_strikes: 3
+        min_speed: 30
+        max_strikes: 6
       REMOVE_FAILED_DOWNLOADS: True
       REMOVE_FAILED_IMPORTS: |
         message_patterns:
