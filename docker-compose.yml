@@ -156,6 +156,38 @@ services:
       - flame.url=http://${HOST_IP}:${RADARR_PORT:-7878}
       - flame.icon=video-vintage
 
+  pinchflat:
+    image: ghcr.io/kieraneglin/pinchflat:latest
+    container_name: pinchflat
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
+    volumes:
+      - ${BASE_PATH}/pinchflat:/config
+      - ${MEDIA_SHARE}/youtube:/downloads:cached
+    ports:
+      - "${PINCHFLAT_PORT:-8945}:8945"
+    networks:
+      - media_net
+    restart: unless-stopped
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "2"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "--silent", "--show-error", "http://localhost:8945"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    labels:
+      - flame.type=app
+      - flame.name=Pinchflat
+      - flame.url=http://${HOST_IP}:${PINCHFLAT_PORT:-8945}
+      - flame.icon=youtube
+      
   bazarr:
     container_name: bazarr
     image: linuxserver/bazarr:latest
@@ -452,6 +484,7 @@ services:
       - ${FAST_MOUNT}/plex/transcode:/transcode
       - ${MEDIA_SHARE}/tv:/tv:cached
       - ${MEDIA_SHARE}/movies:/movies:cached
+      - ${MEDIA_SHARE}/youtube:/youtube:cached
       - ${MEDIA_SHARE}/system:/system:ro,cached
     restart: unless-stopped
     logging:
