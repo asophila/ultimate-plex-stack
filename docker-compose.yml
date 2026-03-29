@@ -189,15 +189,15 @@ services:
       - flame.url=http://${HOST_IP}:13378
       - flame.icon=book-music
   
-  readarr:
-    image: linuxserver/readarr:develop
-    container_name: readarr
+  bookshelf:
+    image: ghcr.io/pennydreadful/bookshelf:hardcover
+    container_name: bookshelf
     environment:
       - PUID=${PUID}
       - PGID=${PGID}
       - TZ=${TZ}
     volumes:
-      - ${BASE_PATH}/readarr:/config
+      - ${BASE_PATH}/bookshelf:/config
       - ${MEDIA_SHARE}:/media:cached
       - ${DOWNLOAD_DIR}:/downloads:cached
     ports:
@@ -211,14 +211,14 @@ services:
         max-size: "10m"
         max-file: "2"
     healthcheck:
-      test: ["CMD", "curl", "--fail", "--silent", "--show-error", "http://localhost:8787/readarr/ping"]
+      test: ["CMD", "curl", "--fail", "--silent", "--show-error", "http://localhost:8787/bookshelf/ping"]
       interval: 30s
       timeout: 10s
       retries: 3
       start_period: 30s
     labels:
       - flame.type=app
-      - flame.name=Readarr
+      - flame.name=Bookshelf
       - flame.url=http://${HOST_IP}:8787
       - flame.icon=book-open-page-variant
 
