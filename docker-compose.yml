@@ -156,6 +156,72 @@ services:
       - flame.url=http://${HOST_IP}:${RADARR_PORT:-7878}
       - flame.icon=video-vintage
 
+  audiobookshelf:
+    image: ghcr.io/advplyr/audiobookshelf:latest
+    container_name: audiobookshelf
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
+    volumes:
+      - ${BASE_PATH}/audiobookshelf:/config
+      - ${MEDIA_SHARE}/audiobooks:/audiobooks
+      - ${MEDIA_SHARE}/podcasts:/podcasts
+    ports:
+      - "13378:80"
+    networks:
+      - media_net
+    restart: unless-stopped
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "2"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "--silent", "--show-error", "http://localhost:80/healthcheck"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    labels:
+      - flame.type=app
+      - flame.name=Audiobookshelf
+      - flame.url=http://${HOST_IP}:13378
+      - flame.icon=book-music
+  
+  readarr:
+    image: linuxserver/readarr:develop
+    container_name: readarr
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
+    volumes:
+      - ${BASE_PATH}/readarr:/config
+      - ${MEDIA_SHARE}:/media:cached
+      - ${DOWNLOAD_DIR}:/downloads:cached
+    ports:
+      - "8787:8787"
+    networks:
+      - media_net
+    restart: unless-stopped
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "2"
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "--silent", "--show-error", "http://localhost:8787/readarr/ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    labels:
+      - flame.type=app
+      - flame.name=Readarr
+      - flame.url=http://${HOST_IP}:8787
+      - flame.icon=book-open-page-variant
+
   pinchflat:
     image: ghcr.io/kieraneglin/pinchflat:latest
     container_name: pinchflat
