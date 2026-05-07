@@ -33,6 +33,12 @@ services:
       - ${CONFIG_DIR:-./config}/gluetun:/gluetun
     networks:
       - media_net
+    healthcheck:                                                                                                                                                
+      test: ["CMD", "/gluetun-entrypoint", "healthcheck"]                                                                                                       
+      interval: 10s                                                                                                                                             
+      timeout: 5s                                                                                                                                               
+      retries: 3                                                                                                                                                
+      start_period: 30s   # El built-in tiene solo 10s, gluetun tarda ~15s
     restart: unless-stopped
     mem_limit: 256M
     memswap_limit: 512M
