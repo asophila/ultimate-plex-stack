@@ -458,8 +458,8 @@ services:
         - base_url: "http://radarr:7878"
           api_key: "${RADARR_KEY}"
       QBITTORRENT: >
-        - base_url: "http://192.168.31.101:8080"
-          username: "admin"
+        - base_url: "http://gluetun:8080"
+          username: "${QBITTORRENT_USERNAME}"
           password: "${QBIT_PASS}"
     networks:
       - media_net
