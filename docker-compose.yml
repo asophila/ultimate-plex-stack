@@ -228,38 +228,31 @@ services:
       - flame.url=http://${HOST_IP}:8787
       - flame.icon=book-open-page-variant
 
-  pinchflat:
-    image: ghcr.io/kieraneglin/pinchflat:latest
-    container_name: pinchflat
-    environment:
-      - PUID=${PUID}
-      - PGID=${PGID}
-      - TZ=${TZ}
-    volumes:
-      - ${BASE_PATH}/pinchflat:/config
-      - ${MEDIA_SHARE}/youtube:/downloads:cached
-    ports:
-      - "${PINCHFLAT_PORT:-8945}:8945"
-    networks:
-      - media_net
-    restart: unless-stopped
-    logging:
-      driver: "json-file"
-      options:
-        max-size: "10m"
-        max-file: "2"
-    healthcheck:
-      test: ["CMD", "curl", "-f", "--silent", "--show-error", "http://localhost:8945"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 30s
-    labels:
-      - flame.type=app
-      - flame.name=Pinchflat
-      - flame.url=http://${HOST_IP}:${PINCHFLAT_PORT:-8945}
-      - flame.icon=youtube
-      
+  ytdl-sub:
+      image: ghcr.io/jmbannon/ytdl-sub:latest      # headless (sin UI). Usa ...-gui:latest si quieres web
+      container_name: ytdl-sub
+      environment:
+        - PUID=${PUID}
+        - PGID=${PGID}
+        - TZ=${TZ}
+        - CRON_SCHEDULE=0 */6 * * *                 # revisa TODOS los canales cada 6h
+        - CRON_RUN_ON_START=false                   # no descargar al reiniciar (evita baneos)
+      volumes:
+        - ${BASE_PATH}/ytdl-sub:/config             # config + temp de descarga en NVMe (hot)
+        - ${MEDIA_SHARE}/youtube:/tv_shows          # salida en eclipse (cold) = carpeta del watcher
+      networks:
+        - media_net
+      restart: unless-stopped
+      logging:
+        driver: "json-file"
+        options:
+          max-size: "10m"
+          max-file: "2"
+      labels:
+        - flame.type=app
+        - flame.name=ytdl-sub
+        - flame.icon=youtube
+    
   bazarr:
     container_name: bazarr
     image: linuxserver/bazarr:latest
