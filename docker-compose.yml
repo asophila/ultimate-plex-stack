@@ -240,6 +240,7 @@ services:
       volumes:
         - ${BASE_PATH}/ytdl-sub:/config             # config + temp de descarga en NVMe (hot)
         - ${MEDIA_SHARE}/youtube:/tv_shows          # salida en eclipse (cold) = carpeta del watcher
+        - ${MEDIA_SHARE}/cine:/cine
       networks:
         - media_net
       restart: unless-stopped
@@ -550,6 +551,7 @@ services:
       - ${MEDIA_SHARE}/tv:/tv:cached
       - ${MEDIA_SHARE}/movies:/movies:cached
       - ${MEDIA_SHARE}/youtube:/youtube:cached
+      - ${MEDIA_SHARE}/cine:/cine:cached
       - ${MEDIA_SHARE}/system:/system:ro,cached
     restart: unless-stopped
     logging:
