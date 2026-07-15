@@ -727,7 +727,7 @@ services:
       - flame.url=http://${HOST_IP}:${FLARESOLVERR_PORT:-8191}
       - flame.icon=puzzle
 
-seerr:
+  seerr:
     image: ghcr.io/seerr-team/seerr:latest
     container_name: seerr
     init: true
