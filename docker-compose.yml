@@ -727,29 +727,28 @@ services:
       - flame.url=http://${HOST_IP}:${FLARESOLVERR_PORT:-8191}
       - flame.icon=puzzle
 
-  overseerr:
-    image: lscr.io/linuxserver/overseerr:latest
-    container_name: overseerr
+seerr:
+    image: ghcr.io/seerr-team/seerr:latest
+    container_name: seerr
+    init: true
     environment:
-      - PUID=${PUID}
-      - PGID=${PGID}
       - TZ=${TZ}
     volumes:
-      - ${BASE_PATH}/overseerr:/config
+      - ${BASE_PATH}/overseerr:/app/config
     ports:
       - "${OVERSEERR_PORT:-5055}:5055"
     networks:
       - media_net
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "curl", "-f", "--silent", "--show-error", "http://localhost:5055/api/v1/status"]
-      interval: 30s
-      timeout: 10s
+      test: wget --no-verbose --tries=1 --spider http://localhost:5055/api/v1/settings/public || exit 1
+      interval: 15s
+      timeout: 3s
       retries: 3
-      start_period: 30s
+      start_period: 20s
     labels:
       - flame.type=app
-      - flame.name=Overseerr
+      - flame.name=Seerr
       - flame.url=http://${HOST_IP}:${OVERSEERR_PORT:-5055}
       - flame.icon=format-list-bulleted-triangle
 
