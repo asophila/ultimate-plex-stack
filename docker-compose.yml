@@ -597,6 +597,30 @@ services:
       - flame.url=http://${HOST_IP}:${WIZARR_PORT:-5690}
       - flame.icon=account-plus
 
+  kometa:
+    image: kometateam/kometa:latest
+    container_name: kometa
+    user: ${PUID}:${PGID}
+    environment:
+      - TZ=${TZ}
+      - KOMETA_CONFIG=/config/config.yml
+      - KOMETA_TIME=03:00          # corre cada día a las 3am
+      - KOMETA_RUN=False           # NO ejecutar al arrancar (evita corridas en cada deploy)
+      - KOMETA_NO_MISSING=False
+    volumes:
+      - ${BASE_PATH}/kometa:/config
+    networks:
+      - media_net
+    restart: unless-stopped
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "2"
+    labels:
+      - flame.type=app
+      - flame.name=Kometa
+      - flame.icon=movie-filter
 
   tautulli:
     image: ghcr.io/tautulli/tautulli:latest
