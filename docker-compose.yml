@@ -383,43 +383,7 @@ services:
       - flame.name=Cleanuparr
       - flame.url=http://${HOST_IP}:${CLEANUPARR_PORT:-11011}
       - flame.icon=broom
-
-  huntarr:
-    image: ghcr.io/plexguide/huntarr:latest
-    container_name: huntarr
-    environment:
-      - PUID=${PUID}
-      - PGID=${PGID}
-      - TZ=${TZ}
-    volumes:
-      - ${BASE_PATH}/huntarr:/config
-    ports:
-      - "${HUNTARR_PORT:-9705}:9705"
-    networks:
-      - media_net
-    restart: unless-stopped
-    deploy:                                         # Resource limits
-      resources:
-        limits:
-          cpus: '1.0'
-          memory: 512M
-    logging:                                        # Limit logging
-      driver: "json-file"
-      options:
-        max-size: "10m"
-        max-file: "2"
-    healthcheck:
-      test: ["CMD", "sh", "-c", "netstat -ltn | grep -c ':9705' || exit 1"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 30s
-    labels:
-      - flame.type=app
-      - flame.name=Huntarr
-      - flame.url=http://${HOST_IP}:${HUNTARR_PORT:-9705}
-      - flame.icon=magnify
-
+      
   decluttarr:
     image: ghcr.io/manimatter/decluttarr:latest
     container_name: decluttarr
