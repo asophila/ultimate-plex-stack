@@ -713,10 +713,10 @@ services:
         max-file: "2"
     healthcheck:
       test: ["CMD-SHELL", "curl -f http://localhost:8191/health || exit 1"]
-      interval: 30s
-      timeout: 10s
+      interval: 2m        # el check lanza un navegador; no conviene machacarlo cada 30s
+      timeout: 60s        # medido: ~30s de respuesta real
+      start_period: 90s
       retries: 3
-      start_period: 30s
     labels:
       - flame.type=app
       - flame.name=Byparr
