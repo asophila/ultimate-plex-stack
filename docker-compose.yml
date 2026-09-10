@@ -375,17 +375,22 @@ services:
       LOG_LEVEL: INFO
       TIMER: 30
       # --- Jobs ---
-      REMOVE_STALLED: True
+      # Strikes are counted once per TIMER (30 min). Old/rare content on public trackers
+      # often has one intermittent seeder: give it a day before giving up. Strikes reset
+      # whenever the download recovers, and the qBittorrent tag "Don't Kill" exempts a torrent.
+      REMOVE_STALLED: |
+        max_strikes: 48              # 24 h with zero peers
       REMOVE_SLOW: |
         min_speed: 10
-        max_strikes: 12
+        max_strikes: 48              # 24 h under 10 KB/s
       REMOVE_FAILED_DOWNLOADS: True
       REMOVE_FAILED_IMPORTS: |
         message_patterns:
           - "Not a Custom Format upgrade for existing*"
           - "Not an upgrade for existing*"
       REMOVE_ORPHANS: False          # 2026-09-10: killed 4 healthy in-progress downloads on a transient Sonarr queue read
-      REMOVE_METADATA_MISSING: True  # magnets that never resolve metadata (Mullvad has no port forwarding)
+      REMOVE_METADATA_MISSING: |     # magnets that never resolve metadata (Mullvad has no port forwarding)
+        max_strikes: 12              # 6 h: a magnet that finds no metadata in 6 h will not find it later
       # --- Instances ---
       SONARR: >
         - base_url: "http://sonarr:8989"
