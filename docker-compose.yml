@@ -1,10 +1,15 @@
-version: "3.8"
+x-logging: &logging
+  driver: "json-file"
+  options:
+    max-size: "10m"
+    max-file: "2"
 
 services:
   # === Download Stack ===
   gluetun:
-    image: qmcgaw/gluetun:latest
+    image: qmcgaw/gluetun:v3.41   # pinned: :latest recreated the download stack unattended (2026-09-10)
     container_name: vpn
+    logging: *logging
     cap_add:
       - NET_ADMIN
     devices:
@@ -23,7 +28,6 @@ services:
       - WIREGUARD_PERSISTENT_KEEPALIVE=25
       - FIREWALL=on
       - FIREWALL_OUTBOUND_SUBNETS=172.16.0.0/12,192.168.0.0/16
-      - DNS_KEEP_NAMESERVER=on
       - LOG_LEVEL=info
       - UPDATER_PERIOD=24h
       - HEALTH_TARGET_ADDRESS=1.1.1.1:443
@@ -47,11 +51,17 @@ services:
       - flame.name=Gluetun VPN
       - flame.url=http://${HOST_IP}:${QBIT_PORT:-8080}
       - flame.icon=vpn
+      - com.centurylinklabs.watchtower.enable=false   # update by hand: watchtower ignores service_healthy ordering
  
   qbittorrent:
     image: linuxserver/qbittorrent:latest
     container_name: qbittorrent
+    logging: *logging
     network_mode: "service:gluetun"
+    ulimits:
+      nofile:            # without this qbittorrent-nox inherits nofile=2^30 and freezes on any spawn (qBittorrent #23453)
+        soft: 32768
+        hard: 65536
     environment:
       - PUID=${PUID}
       - PGID=${PGID}
@@ -59,8 +69,8 @@ services:
       - WEBUI_PORT=${QBIT_PORT:-8080}
     volumes:
       - ${BASE_PATH}/qbittorrent:/config
-      - ${DOWNLOAD_DIR}:/downloads:cached
-      - ${INCOMPLETE_DOWNLOAD_DIR}:/incomplete:cached
+      - ${DOWNLOAD_DIR}:/downloads
+      - ${INCOMPLETE_DOWNLOAD_DIR}:/incomplete
     restart: unless-stopped
     mem_limit: 1024M
     memswap_limit: 1536M
@@ -68,21 +78,24 @@ services:
       gluetun:                                                                                                                                              
         condition: service_healthy                                                                                                                                                                    
     healthcheck:                                                                                                                                            
-      test: ["CMD-SHELL", "wget -qO- http://localhost:8080/api/v2/app/version || exit 1"]
-      interval: 60s                                                                                                                                         
-      timeout: 10s                          
-      retries: 3                                                                                                                                            
-      start_period: 120s
+      # WebUI up AND libtorrent has DHT nodes: 0 nodes means it started before tun0 existed and is bound to eth0
+      test: ["CMD-SHELL", "wget -qO- http://localhost:8080/api/v2/transfer/info | grep -q '\"dht_nodes\":[1-9]' || exit 1"]
+      interval: 60s
+      timeout: 10s
+      retries: 3
+      start_period: 180s
     labels:
       - flame.type=app
       - flame.name=qBittorrent
       - flame.url=http://${HOST_IP}:${QBIT_PORT:-8080}
       - flame.icon=download
+      - com.centurylinklabs.watchtower.enable=false
 
   # === Media Management ===
   prowlarr:
     image: linuxserver/prowlarr:latest
     container_name: prowlarr
+    logging: *logging
     environment:
       - PUID=${PUID}
       - PGID=${PGID}
@@ -109,14 +122,15 @@ services:
   sonarr:
     image: linuxserver/sonarr:latest
     container_name: sonarr
+    logging: *logging
     environment:
       - PUID=${PUID}
       - PGID=${PGID}
       - TZ=${TZ}
     volumes:
       - ${BASE_PATH}/sonarr:/config
-      - ${MEDIA_SHARE}:/media:cached
-      - ${DOWNLOAD_DIR}:/downloads:cached
+      - ${MEDIA_SHARE}:/media
+      - ${DOWNLOAD_DIR}:/downloads
     ports:
       - "${SONARR_PORT:-8989}:8989"
     networks:
@@ -137,14 +151,15 @@ services:
   radarr:
     image: linuxserver/radarr:latest
     container_name: radarr
+    logging: *logging
     environment:
       - PUID=${PUID}
       - PGID=${PGID}
       - TZ=${TZ}
     volumes:
       - ${BASE_PATH}/radarr:/config
-      - ${MEDIA_SHARE}:/media:cached
-      - ${DOWNLOAD_DIR}:/downloads:cached
+      - ${MEDIA_SHARE}:/media
+      - ${DOWNLOAD_DIR}:/downloads
     ports:
       - "${RADARR_PORT:-7878}:7878"
     networks:
@@ -204,8 +219,8 @@ services:
       - TZ=${TZ}
     volumes:
       - ${BASE_PATH}/bookshelf:/config
-      - ${MEDIA_SHARE}:/media:cached
-      - ${DOWNLOAD_DIR}:/downloads:cached
+      - ${MEDIA_SHARE}:/media
+      - ${DOWNLOAD_DIR}:/downloads
     ports:
       - "8787:8787"
     networks:
@@ -256,6 +271,7 @@ services:
     
   bazarr:
     container_name: bazarr
+    logging: *logging
     image: linuxserver/bazarr:latest
     environment:
       - PUID=${PUID}
@@ -263,7 +279,7 @@ services:
       - TZ=${TZ}
     volumes:
       - ${BASE_PATH}/bazarr:/config
-      - ${MEDIA_SHARE}:/media:cached
+      - ${MEDIA_SHARE}:/media
     ports:
       - "${BAZARR_PORT:-6767}:6767"
     networks:
@@ -284,6 +300,7 @@ services:
   subgen:
     image: mccloud/subgen:latest
     container_name: subgen
+    logging: *logging
     environment:
       - PUID=${PUID}
       - PGID=${PGID}
@@ -322,8 +339,8 @@ services:
       - PROCMEDIAONPLAY=False
     volumes:
       - ${BASE_PATH}/subgen:/config
-      - ${MEDIA_SHARE}/tv:/tv:cached
-      - ${MEDIA_SHARE}/movies:/movies:cached
+      - ${MEDIA_SHARE}/tv:/tv
+      - ${MEDIA_SHARE}/movies:/movies
       - ${FAST_MOUNT}/subgen/transcribe:/transcribe  # GPU temp processing on NVMe
     ports:
       - "8580:8080"  # Change if conflicts with qBittorrent
@@ -343,47 +360,7 @@ services:
       - flame.url=http://${HOST_IP}:8580
       - flame.icon=subtitles
       
-  cleanuparr:
-    image: ghcr.io/cleanuparr/cleanuparr:latest
-    container_name: cleanuparr
-    environment:
-      - PUID=${PUID}
-      - PGID=${PGID}
-      - TZ=${TZ}
-      - PORT=11011
-      - BASE_PATH=
-      - UMASK=022
-    volumes:
-      - ${BASE_PATH}/cleanuparr:/config
-      - ${DOWNLOAD_DIR}:/downloads:cached
-      - ${MEDIA_SHARE}:/media:cached
-    ports:
-      - "${CLEANUPARR_PORT:-11011}:11011"
-    networks:
-      - media_net
-    restart: unless-stopped
-    deploy:                                         # Resource limits
-      resources:
-        limits:
-          cpus: '0.5'
-          memory: 256M
-    logging:                                        # Limit logging
-      driver: "json-file"
-      options:
-        max-size: "10m"
-        max-file: "2"
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:11011/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 30s
-    labels:
-      - flame.type=app
-      - flame.name=Cleanuparr
-      - flame.url=http://${HOST_IP}:${CLEANUPARR_PORT:-11011}
-      - flame.icon=broom
-      
+
   decluttarr:
     image: ghcr.io/manimatter/decluttarr:latest
     container_name: decluttarr
@@ -400,14 +377,15 @@ services:
       # --- Jobs ---
       REMOVE_STALLED: True
       REMOVE_SLOW: |
-        min_speed: 30
-        max_strikes: 6
+        min_speed: 10
+        max_strikes: 12
       REMOVE_FAILED_DOWNLOADS: True
       REMOVE_FAILED_IMPORTS: |
         message_patterns:
           - "Not a Custom Format upgrade for existing*"
           - "Not an upgrade for existing*"
-      REMOVE_ORPHANS: True
+      REMOVE_ORPHANS: False          # 2026-09-10: killed 4 healthy in-progress downloads on a transient Sonarr queue read
+      REMOVE_METADATA_MISSING: True  # magnets that never resolve metadata (Mullvad has no port forwarding)
       # --- Instances ---
       SONARR: >
         - base_url: "http://sonarr:8989"
@@ -512,10 +490,10 @@ services:
     volumes:
       - ${FAST_MOUNT}/plex/config:/config           
       - ${FAST_MOUNT}/plex/transcode:/transcode
-      - ${MEDIA_SHARE}/tv:/tv:cached
-      - ${MEDIA_SHARE}/movies:/movies:cached
-      - ${MEDIA_SHARE}/youtube:/youtube:cached
-      - ${MEDIA_SHARE}/cine:/cine:cached
+      - ${MEDIA_SHARE}/tv:/tv
+      - ${MEDIA_SHARE}/movies:/movies
+      - ${MEDIA_SHARE}/youtube:/youtube
+      - ${MEDIA_SHARE}/cine:/cine
       - ${MEDIA_SHARE}/system:/system:ro,cached
     restart: unless-stopped
     logging:
@@ -538,6 +516,7 @@ services:
   wizarr:
     image: ghcr.io/wizarrrr/wizarr:latest
     container_name: wizarr
+    logging: *logging
     environment:
       - PUID=${PUID}
       - PGID=${PGID}
@@ -589,6 +568,7 @@ services:
   tautulli:
     image: ghcr.io/tautulli/tautulli:latest
     container_name: tautulli
+    logging: *logging
     environment:
       - PUID=${PUID}
       - PGID=${PGID}
@@ -667,6 +647,7 @@ services:
   watchtower:
     image: containrrr/watchtower:latest
     container_name: watchtower
+    logging: *logging
     environment:
       - TZ=${TZ}
       - WATCHTOWER_CLEANUP=true
@@ -725,6 +706,7 @@ services:
   seerr:
     image: ghcr.io/seerr-team/seerr:latest
     container_name: seerr
+    logging: *logging
     init: true
     environment:
       - TZ=${TZ}
@@ -787,6 +769,7 @@ services:
   flame:
     image: pawelmalak/flame:latest
     container_name: flame
+    logging: *logging
     environment:
       - PUID=${PUID}
       - PGID=${PGID}
@@ -815,8 +798,8 @@ services:
   autoheal:
     image: willfarrell/autoheal:latest
     container_name: autoheal
+    logging: *logging
     restart: always
-    privileged: true  # ADD THIS - needed to restart containers
     environment:
       - AUTOHEAL_CONTAINER_LABEL=all
       - AUTOHEAL_INTERVAL=120
@@ -850,7 +833,7 @@ services:
       - ${FAST_MOUNT}/fileflows/temp:/temp          # CHANGED: NVMe temp processing
       - ${FAST_MOUNT}/fileflows/logs:/app/Logs      # CHANGED: NVMe logs
       - /var/run/docker.sock:/var/run/docker.sock:ro
-      - ${MEDIA_SHARE}:/library:cached
+      - ${MEDIA_SHARE}:/library
       - /usr/lib/x86_64-linux-gnu/nvidia:/usr/lib/x86_64-linux-gnu/nvidia:ro
     ports:
       - "${FILEFLOWS_PORT:-19200}:5000"
